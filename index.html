@@ -7762,7 +7762,7 @@ ATA -->
       app.updateTokenDisplaySettings = function() {
         const tokenBadge = document.getElementById('setting-token-count-badge');
         if (tokenBadge) {
-          tokenBadge.innerText = `Current Token: #${app.getCurrentTokenNumber()}`;
+          tokenBadge.innerText = ` #: ${app.getCurrentTokenNumber()}`;
         }
       };
 
@@ -7775,7 +7775,7 @@ ATA -->
           <!-- Shop Profile Card -->
           <div class="app-card" id="card-shop-profile-settings">
             <h3 style="font-size:0.95rem; font-weight:800; margin-bottom:12px;">
-              <i class="fa-solid fa-store" style="color:var(--primary-accent);"></i> Restaurant & Shop Profile (دکان کا نام اور معلومات)
+              <i class="fa-solid fa-store" style="color:var(--primary-accent);"></i> Restaurant & Shop Profile 
             </h3>
             <div class="form-group">
               <label class="form-label">Restaurant / Shop Name *</label>
@@ -7799,20 +7799,20 @@ ATA -->
           </div>
 
           <!-- Daily Token Management Card -->
-          <div class="app-card" id="card-token-settings">
-            <div class="card-header" style="margin-bottom:6px;">
-              <h3 style="font-size:0.95rem; font-weight:800;">
-                <i class="fa-solid fa-ticket" style="color:var(--accent-amber);"></i> Daily Token Counter (ٹوکن سسٹم)
-              </h3>
-              <span class="badge-tag cash" id="setting-token-count-badge">Current Token: #0</span>
-            </div>
-            <p style="font-size:0.75rem; color:var(--text-muted); margin-bottom:10px;">
-              ٹوکن نمبر ہر روز صبح خودکار طور پر <strong>#1</strong> سے شروع ہوتا ہے۔ ضرورت پڑنے پر آپ نیچے سے مینول ری سیٹ بھی کر سکتے ہیں۔
-            </p>
-            <button class="btn btn-outline" style="border-color:var(--accent-amber); color:var(--accent-amber);" onclick="app.resetTokenManually()">
-              <i class="fa-solid fa-rotate-left"></i> Reset Token to #1 
-            </button>
-          </div>
+<div class="app-card" id="card-token-settings">
+  <div class="card-header" style="margin-bottom:6px;">
+    <h3 style="font-size:0.95rem; font-weight:800;">
+      <i class="fa-solid fa-ticket" style="color:var(--accent-amber);"></i> Daily Token Counter
+    </h3>
+    <span class="badge-tag cash" id="setting-token-count-badge">Current Token: #0</span>
+  </div>
+  <p style="font-size:0.75rem; color:var(--text-muted); margin-bottom:10px;">
+    The token number automatically resets to <strong>#1</strong> every morning. If needed, you can also manually reset it using the button below.
+  </p>
+  <button class="btn btn-outline" style="border-color:var(--accent-amber); color:var(--accent-amber);" onclick="app.resetTokenManually()">
+    <i class="fa-solid fa-rotate-left"></i> Reset Token to #1 
+  </button>
+</div>
         `;
         settingsView.insertAdjacentHTML('afterbegin', profileCardHtml);
       }
@@ -9549,6 +9549,1010 @@ ATA -->
   };
 })();
 </script>
+  <!-- ========================================================================
+     100% FIXED: ZERO-CUT DYNAMIC HEIGHT THERMAL PDF ENGINE (MULTI-ITEM SAFE)
+     ======================================================================== -->
+
+<script>
+(function() {
+  // Override POS Bill PDF Generator with Intelligent Auto-Expanding Canvas
+  app.downloadPdfInvoice = function() {
+    const originalReceipt = document.getElementById('actual-sale-receipt') || document.getElementById('printable-receipt');
+    const sale = this.state.currentInvoiceData;
+
+    if (!originalReceipt) {
+      alert("Receipt element nahi mila!");
+      return;
+    }
+
+    // 1. Create a detached rendering container to prevent UI shifting
+    const renderClone = originalReceipt.cloneNode(true);
+    renderClone.style.width = '76mm'; // Standard Thermal Width
+    renderClone.style.maxWidth = '76mm';
+    renderClone.style.padding = '6mm 4mm 10mm 4mm'; // Safe bottom margin so footer is never cropped
+    renderClone.style.background = '#ffffff';
+    renderClone.style.color = '#000000';
+    renderClone.style.boxSizing = 'border-box';
+    renderClone.style.fontFamily = "'Courier New', Courier, monospace";
+    renderClone.style.fontSize = '11px';
+    renderClone.style.lineHeight = '1.35';
+
+    // Ensure all internal fonts and dashed lines are solid black for PDF
+    renderClone.querySelectorAll('*').forEach(el => {
+      el.style.color = '#000000';
+      if (el.classList.contains('tp-dashed')) {
+        el.style.borderBottom = '1px dashed #000000';
+      }
+      if (el.classList.contains('tp-double')) {
+        el.style.borderBottom = '2px solid #000000';
+      }
+    });
+
+    const hiddenSandbox = document.createElement('div');
+    hiddenSandbox.style.position = 'fixed';
+    hiddenSandbox.style.left = '-9999px';
+    hiddenSandbox.style.top = '0';
+    hiddenSandbox.style.zIndex = '-1000';
+    hiddenSandbox.appendChild(renderClone);
+    document.body.appendChild(hiddenSandbox);
+
+    // 2. Accurately measure dynamic receipt height (in mm) based on items count
+    const totalHeightPx = renderClone.scrollHeight;
+    // Conversion: 1px approx 0.264583 mm + buffer
+    const dynamicHeightMm = Math.max(120, Math.ceil(totalHeightPx * 0.264583) + 16);
+
+    const invoiceNumber = sale ? (sale.invoiceNo || 'Order') : 'Receipt';
+    const opt = {
+      margin: 0,
+      filename: `Bill_${invoiceNumber}.pdf`,
+      image: { type: 'jpeg', quality: 1.0 },
+      html2canvas: {
+        scale: 3, // Ultra-crisp HD text resolution
+        useCORS: true,
+        backgroundColor: '#ffffff',
+        scrollY: 0,
+        scrollX: 0
+      },
+      jsPDF: {
+        unit: 'mm',
+        format: [76, dynamicHeightMm], // Exact dynamic height format (No extra page, no cut)
+        orientation: 'portrait'
+      }
+    };
+
+    // 3. Execute PDF generation and clean sandbox
+    html2pdf().set(opt).from(renderClone).save().then(() => {
+      document.body.removeChild(hiddenSandbox);
+    }).catch((err) => {
+      console.error("PDF Export Error:", err);
+      document.body.removeChild(hiddenSandbox);
+      alert("PDF download mein masla aaya, browser print use karein.");
+    });
+  };
+})();
+</script>
   
+  <!-- ========================================================================
+     ZAYYAM TECH PRO MONETIZATION & FEATURE LOCK ENGINE (FREEMIUM / PRO)
+     ======================================================================== -->
+
+<!-- 1. Ultra-Premium Glassmorphic PRO Upgrade Modal -->
+<div class="modal-overlay" id="modal-pro-upgrade" style="z-index: 99999999;">
+  <div class="modal-sheet" style="max-width: 460px; background: #0c1322; border: 1px solid rgba(255, 107, 0, 0.4); box-shadow: 0 10px 40px rgba(0,0,0,0.8);">
+    <div class="modal-header" style="border-bottom: 1px solid rgba(255,255,255,0.08); padding: 14px 18px;">
+      <div style="display:flex; align-items:center; gap:8px;">
+        <div style="width:32px; height:32px; border-radius:8px; background:linear-gradient(135deg, #f59e0b, #d97706); display:grid; place-items:center; color:#fff; font-size:1rem;">
+          <i class="fa-solid fa-crown"></i>
+        </div>
+        <div>
+          <h3 style="font-size: 1.05rem; font-weight:900; margin:0; color:#fff;">Upgrade to Zayyam PRO</h3>
+          <span style="font-size:0.68rem; color:#94a3b8;">Unlock All Business & ERP Features</span>
+        </div>
+      </div>
+      <button class="btn-close-modal" onclick="app.closeModal('modal-pro-upgrade')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+
+    <div class="modal-body" style="padding: 16px 18px; max-height: 75vh; overflow-y: auto;">
+      <!-- Feature Notice -->
+      <div style="text-align:center; margin-bottom:14px;">
+        <span class="badge-tag" style="background:rgba(239, 68, 68, 0.15); color:#ef4444; font-size:0.7rem; padding:4px 10px;" id="pro-locked-feature-title">
+          <i class="fa-solid fa-lock"></i> Premium Feature Locked
+        </span>
+        <h4 style="font-size:0.95rem; font-weight:800; color:#f8fafc; margin: 8px 0 4px;">Yeh Feature Sirf PRO Plan Mein Mojood Hai</h4>
+        <p style="font-size:0.75rem; color:#94a3b8; margin:0;">Apne Fast Food business ko professional level par automate karein.</p>
+      </div>
+
+      <!-- Pricing Card -->
+      <div class="app-card" style="background: linear-gradient(135deg, rgba(255, 107, 0, 0.15), rgba(16, 23, 40, 0.9)); border: 2px solid var(--primary-accent); padding: 14px; text-align:center; margin-bottom:14px;">
+        <span style="font-size:0.65rem; font-weight:800; letter-spacing:1px; text-transform:uppercase; color:var(--primary-accent);">All-Inclusive Unlimited License</span>
+        <div style="font-size:1.9rem; font-weight:900; color:#fff; margin:4px 0;">
+          Rs. 1,499 <span style="font-size:0.8rem; font-weight:600; color:#94a3b8;">/ Month</span>
+        </div>
+        <div style="font-size:0.72rem; color:#34d399; font-weight:700;"><i class="fa-solid fa-check"></i> Unlimited Everything • 24/7 WhatsApp Support</div>
+      </div>
+
+      <!-- Locked Features List -->
+      <div style="display:flex; flex-direction:column; gap:8px; font-size:0.78rem; color:#cbd5e1; margin-bottom:16px;">
+        <div style="display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-circle-check" style="color:var(--accent-green);"></i> <strong>Cash In Hand & Daily Drawer (گلا کھاتہ)</strong></div>
+        <div style="display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-circle-check" style="color:var(--accent-green);"></i> <strong>Google Drive Cloud Backup (Never-Expire)</strong></div>
+        <div style="display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-circle-check" style="color:var(--accent-green);"></i> <strong>WhatsApp 1-Tap Direct Invoice Share</strong></div>
+        <div style="display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-circle-check" style="color:var(--accent-green);"></i> <strong>P&L Reports, Recycle Bin & Appearance Customizer</strong></div>
+        <div style="display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-circle-check" style="color:var(--accent-green);"></i> <strong>Unlimited Shop Profile & Name Edits</strong></div>
+        <div style="display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-circle-check" style="color:var(--accent-green);"></i> <strong>Remove Zayyam Tech Watermark from Bill & Splash</strong></div>
+      </div>
+
+      <!-- Direct Contact CTA -->
+      <a href="https://wa.me/923292382812?text=Hello%20Zayyam%20Tech,%20I%20want%20to%20upgrade%20my%20Fast%20Food%20POS%20to%20PRO%20Plan." target="_blank" class="btn btn-green" style="text-decoration:none; padding:12px; font-size:0.9rem; margin-bottom:10px;">
+        <i class="fa-brands fa-whatsapp" style="font-size:1.1rem;"></i> Contact Zayyam Tech (0329-2382812)
+      </a>
+
+      <!-- License Key Activation Input -->
+      <div style="background:var(--bg-surface-elevated); padding:10px; border-radius:var(--radius-md); border:1px solid var(--border-subtle); margin-top:8px;">
+        <label class="form-label" style="font-size:0.68rem;">Already Have a PRO License Key?</label>
+        <div style="display:flex; gap:6px;">
+          <input type="text" id="input-license-key" class="form-control" placeholder="Enter License Key" style="font-size:0.8rem; text-transform:uppercase;">
+          <button class="btn btn-orange" style="width:auto; padding:0 14px;" onclick="zayyamLicense.activateKey()">Activate</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  /* Lock Badges on Free Tier */
+  .badge-locked {
+    background: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+    font-size: 0.6rem;
+    padding: 2px 6px;
+    border-radius: var(--radius-full);
+    margin-left: 6px;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+  }
+
+  .nav-pro-badge {
+    position: absolute;
+    top: 4px;
+    right: 12px;
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: #fff;
+    font-size: 0.55rem;
+    font-weight: 800;
+    padding: 1px 5px;
+    border-radius: 6px;
+  }
+</style>
+
+<script>
+(function() {
+  class ZayyamLicenseEngine {
+    constructor() {
+      this.MASTER_PRO_KEY = 'ZAYYAM-PRO-2026';
+      this.isPro = localStorage.getItem('zayyam_pos_tier') === 'PRO';
+    }
+
+    // Check if system is PRO
+    isProPlan() {
+      return this.isPro;
+    }
+
+    // Trigger upgrade modal with feature title
+    promptUpgrade(featureName) {
+      const title = document.getElementById('pro-locked-feature-title');
+      if (title) title.innerHTML = `<i class="fa-solid fa-lock"></i> ${featureName} is a PRO Feature`;
+      app.openModal('modal-pro-upgrade');
+    }
+
+    // Activate License Key
+    activateKey() {
+      const key = (document.getElementById('input-license-key')?.value || '').trim().toUpperCase();
+      if (key === this.MASTER_PRO_KEY) {
+        localStorage.setItem('zayyam_pos_tier', 'PRO');
+        this.isPro = true;
+        alert("Mubarak Ho! Zayyam Tech PRO License Kamyabi se Activate ho gaya hai! Tamam Features Unlock ho chuke hain.");
+        app.closeModal('modal-pro-upgrade');
+        location.reload();
+      } else {
+        alert("Ghalt License Key! Please contact 0329-2382812 to purchase genuine PRO license.");
+      }
+    }
+
+    // 1 Time a Month Shop Name Change Policy
+    canChangeShopName() {
+      if (this.isPro) return true; // PRO gets unlimited
+
+      const lastChange = localStorage.getItem('ff_shop_name_last_changed');
+      if (!lastChange) return true;
+
+      const thirtyDaysMs = 30 * 24 * 60 * 60 * 1000;
+      const timeDiff = Date.now() - Number(lastChange);
+
+      if (timeDiff >= thirtyDaysMs) {
+        return true;
+      } else {
+        const daysLeft = Math.ceil((thirtyDaysMs - timeDiff) / (24 * 60 * 60 * 1000));
+        alert(`Free Plan mein Restaurant ka naam mahine mein sirf 1 dafa badal sakte hain. Agli tabdeeli ${daysLeft} din baad mumkin hai. Ya PRO Plan le kar Unlimited karein.`);
+        this.promptUpgrade('Unlimited Shop Name Updates');
+        return false;
+      }
+    }
+
+    markShopNameChanged() {
+      if (!this.isPro) {
+        localStorage.setItem('ff_shop_name_last_changed', Date.now());
+      }
+    }
+  }
+
+  window.zayyamLicense = new ZayyamLicenseEngine();
+
+  // ----------------------------------------------------------------------
+  // 2. FEATURE GATING & ROUTE PROTECTION
+  // ----------------------------------------------------------------------
+
+  // A. Protect Views: Reports, Appearance, Trash, Cash In Hand
+  const originalNavigateTo = app.navigateTo;
+  app.navigateTo = function(viewId, pushHistory = true) {
+    const lockedViews = {
+      'reports': 'P&L Financial Reports',
+      'trash': 'Recycle Bin & Data Restore',
+      'appearance': 'Custom Theme & Colors',
+      'cashinhand': 'Cash In Hand Register',
+      'recovery': 'Daily Recovery Register'
+    };
+
+    if (!window.zayyamLicense.isProPlan() && lockedViews[viewId]) {
+      window.zayyamLicense.promptUpgrade(lockedViews[viewId]);
+      return;
+    }
+
+    originalNavigateTo.call(this, viewId, pushHistory);
+  };
+
+  // B. Protect Daily Till / Cash Drawer Closing
+  const originalOpenDayEnd = app.openDayEndClosingModal;
+  if (originalOpenDayEnd) {
+    app.openDayEndClosingModal = function() {
+      if (!window.zayyamLicense.isProPlan()) {
+        window.zayyamLicense.promptUpgrade('Daily Drawer / Galla Audit');
+        return;
+      }
+      originalOpenDayEnd.call(this);
+    };
+  }
+
+  // C. Protect WhatsApp Invoice Share
+  const originalShareWA = app.shareCurrentSaleWhatsApp;
+  if (originalShareWA) {
+    app.shareCurrentSaleWhatsApp = function() {
+      if (!window.zayyamLicense.isProPlan()) {
+        window.zayyamLicense.promptUpgrade('WhatsApp Instant Invoice Share');
+        return;
+      }
+      originalShareWA.call(this);
+    };
+  }
+
+  // D. Protect Google Drive Cloud Sync
+  if (window.gdriveSync) {
+    const originalConnectAccount = window.gdriveSync.connectAccount;
+    window.gdriveSync.connectAccount = function() {
+      if (!window.zayyamLicense.isProPlan()) {
+        window.zayyamLicense.promptUpgrade('Google Drive Cloud Backup');
+        return;
+      }
+      originalConnectAccount.call(this);
+    };
+  }
+
+  // E. Enforce 1-Month Shop Name Policy on Free Plan
+  const originalSaveShopProfile = app.saveShopProfile;
+  app.saveShopProfile = function() {
+    if (!window.zayyamLicense.canChangeShopName()) {
+      return;
+    }
+    originalSaveShopProfile.call(this);
+    window.zayyamLicense.markShopNameChanged();
+  };
+
+  // ----------------------------------------------------------------------
+  // 3. WATERMARK TOGGLER: PRO REMOVES WATERMARK, FREE KEEPS IT
+  // ----------------------------------------------------------------------
+  const originalShowInvoice = app.showInvoiceSlip;
+  app.showInvoiceSlip = function(sale, items) {
+    originalShowInvoice.call(this, sale, items);
+
+    // If PRO, allow clean white-label bill
+    if (window.zayyamLicense.isProPlan()) {
+      const receipt = document.getElementById('actual-sale-receipt');
+      if (receipt) {
+        const footers = receipt.querySelectorAll('.tp-footer-branding');
+        footers.forEach(f => f.innerHTML = 'Thank you for dining with us!');
+      }
+    }
+  };
+
+  // If PRO, hide sponsor badge from Splash screen
+  if (window.zayyamLicense.isProPlan()) {
+    const splashSponsor = document.getElementById('zayyam-sponsor-badge');
+    if (splashSponsor) splashSponsor.style.display = 'none';
+  }
+
+  // Inject PRO Badges on Navigation & Settings UI
+  window.addEventListener('DOMContentLoaded', () => {
+    // Add PRO License manager card in Settings View
+    const settingsCard = document.querySelector('#view-settings .app-card');
+    if (settingsCard && !document.getElementById('card-pro-status-box')) {
+      const proCard = document.createElement('div');
+      proCard.className = 'app-card';
+      proCard.id = 'card-pro-status-box';
+      const isPro = window.zayyamLicense.isProPlan();
+
+      proCard.innerHTML = `
+        <div class="card-header" style="margin-bottom:8px;">
+          <span class="card-title">
+            <i class="fa-solid fa-crown" style="color:var(--accent-amber);"></i> Software Plan & License
+          </span>
+          <span class="badge-tag ${isPro ? 'cash' : 'credit'}">${isPro ? 'PRO  ACTIVE' : 'FREE ACTIVE'}</span>
+        </div>
+        <p style="font-size:0.75rem; color:var(--text-muted); margin-bottom:10px;">
+          ${isPro ? 'Aapka PRO Plan mukammal activate hai. Tamam features unlock hain.' : 'Free tier par Cash in Hand, Reports, aur Cloud Backup locked hain. Unlock karne ke liye upgrade karein.'}
+        </p>
+        <button class="btn ${isPro ? 'btn-outline' : 'btn-orange'}" onclick="app.openModal('modal-pro-upgrade')">
+          <i class="fa-solid fa-gem"></i> ${isPro ? 'Manage License' : 'Upgrade to Zayyam PRO'}
+        </button>
+      `;
+      settingsCard.parentNode.insertBefore(proCard, settingsCard);
+    }
+  });
+})();
+</script>
+  
+  <!-- ========================================================================
+     ONE-TIME ONLY WELCOME & FEATURE ONBOARDING TOUR MODAL
+     ======================================================================== -->
+
+<!-- Welcome Onboarding Modal -->
+<div class="modal-overlay" id="modal-first-welcome" style="z-index: 999999999; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(8px);">
+  <div class="modal-sheet" style="max-width: 450px; background: #0c1322; border: 1px solid var(--border-subtle); border-radius: 24px; padding: 0; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.9);">
+    
+    <!-- Header Hero Banner -->
+    <div style="background: linear-gradient(135deg, #ff6b00, #ff9800); padding: 24px 20px; text-align: center; color: #fff; position: relative;">
+      <div style="width: 58px; height: 58px; background: rgba(255,255,255,0.2); border-radius: 18px; display: grid; place-items: center; margin: 0 auto 10px; font-size: 1.8rem;">
+        <i class="fa-solid fa-burger"></i>
+      </div>
+      <h2 style="font-size: 1.35rem; font-weight: 900; margin: 0 0 4px; text-transform: uppercase;">Welcome to Fast Food POS</h2>
+      <p style="font-size: 0.78rem; margin: 0; opacity: 0.95;">All-in-One Restaurant ERP by Zayyam Tech</p>
+    </div>
+
+    <!-- Features Highlights Body -->
+    <div style="padding: 20px 20px 10px; display: flex; flex-direction: column; gap: 14px;">
+      
+      <!-- Feature 1: POS Billing -->
+      <div style="display: flex; align-items: flex-start; gap: 12px;">
+        <div style="width: 38px; height: 38px; border-radius: 12px; background: rgba(255,107,0,0.15); color: var(--primary-accent); display: grid; place-items: center; font-size: 1rem; flex-shrink: 0;">
+          <i class="fa-solid fa-cash-register"></i>
+        </div>
+        <div>
+          <h4 style="font-size: 0.88rem; font-weight: 800; color: #fff; margin: 0 0 2px;">Fast Touch Billing</h4>
+          <p style="font-size: 0.73rem; color: #94a3b8; margin: 0; line-height: 1.35;">58mm/80mm Thermal Print, Token System & 1-Tap Checkout.</p>
+        </div>
+      </div>
+
+      <!-- Feature 2: Customer Khata -->
+      <div style="display: flex; align-items: flex-start; gap: 12px;">
+        <div style="width: 38px; height: 38px; border-radius: 12px; background: rgba(59,130,246,0.15); color: var(--accent-blue); display: grid; place-items: center; font-size: 1rem; flex-shrink: 0;">
+          <i class="fa-solid fa-book"></i>
+        </div>
+        <div>
+          <h4 style="font-size: 0.88rem; font-weight: 800; color: #fff; margin: 0 0 2px;">Customer & Supplier Khata</h4>
+          <p style="font-size: 0.73rem; color: #94a3b8; margin: 0; line-height: 1.35;">Complete Udhar, Recovery & WhatsApp PDF statements.</p>
+        </div>
+      </div>
+
+      <!-- Feature 3: Day-End Closing -->
+      <div style="display: flex; align-items: flex-start; gap: 12px;">
+        <div style="width: 38px; height: 38px; border-radius: 12px; background: rgba(16,185,129,0.15); color: var(--accent-green); display: grid; place-items: center; font-size: 1rem; flex-shrink: 0;">
+          <i class="fa-solid fa-lock"></i>
+        </div>
+        <div>
+          <h4 style="font-size: 0.88rem; font-weight: 800; color: #fff; margin: 0 0 2px;">Daily Cash Drawer Audit</h4>
+          <p style="font-size: 0.73rem; color: #94a3b8; margin: 0; line-height: 1.35;">Galla audit, theft detection & expected vs physical cash tally.</p>
+        </div>
+      </div>
+
+      <!-- Feature 4: Cloud Sync -->
+      <div style="display: flex; align-items: flex-start; gap: 12px;">
+        <div style="width: 38px; height: 38px; border-radius: 12px; background: rgba(139,92,246,0.15); color: #8b5cf6; display: grid; place-items: center; font-size: 1rem; flex-shrink: 0;">
+          <i class="fa-brands fa-google-drive"></i>
+        </div>
+        <div>
+          <h4 style="font-size: 0.88rem; font-weight: 800; color: #fff; margin: 0 0 2px;">Google Drive Cloud Sync</h4>
+          <p style="font-size: 0.73rem; color: #94a3b8; margin: 0; line-height: 1.35;">Zero-expiry automatic background cloud backup & 1-click restore.</p>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Action Buttons Footer -->
+    <div style="padding: 18px 20px 20px; display: flex; flex-direction: column; gap: 8px;">
+      <button class="btn btn-orange" style="padding: 13px; font-size: 0.92rem; border-radius: 14px;" onclick="window.__dismissWelcomeModalOnce()">
+        <i class="fa-solid fa-rocket"></i> Get Started (شروع کریں)
+      </button>
+
+      <a href="https://wa.me/923292382812?text=Hello%20Zayyam%20Tech,%20I%20am%20using%20Fast%20Food%20POS%20and%20need%20help." target="_blank" style="text-align: center; font-size: 0.72rem; color: #34d399; text-decoration: none; font-weight: 700; padding: 4px;">
+        <i class="fa-brands fa-whatsapp"></i> Need Setup Help? WhatsApp Zayyam Tech (0329-2382812)
+      </a>
+    </div>
+
+  </div>
+</div>
+
+<script>
+(function() {
+  // Dismiss handler: Saves flag so it NEVER shows again
+  window.__dismissWelcomeModalOnce = function() {
+    localStorage.setItem('ff_welcome_seen_v1', 'true');
+    const modal = document.getElementById('modal-first-welcome');
+    if (modal) {
+      modal.classList.remove('active');
+      setTimeout(() => modal.remove(), 300);
+    }
+  };
+
+  function checkFirstTimeUser() {
+    const hasSeen = localStorage.getItem('ff_welcome_seen_v1');
+    if (hasSeen === 'true') {
+      // User has already seen it, remove modal from DOM silently
+      const modal = document.getElementById('modal-first-welcome');
+      if (modal) modal.remove();
+      return;
+    }
+
+    // If new user: Wait until opening splash screen finishes, then show this
+    const observer = new MutationObserver(() => {
+      const splash = document.getElementById('app-boot-splash');
+      if (!splash) {
+        observer.disconnect();
+        setTimeout(() => {
+          const modal = document.getElementById('modal-first-welcome');
+          if (modal) modal.classList.add('active');
+        }, 350);
+      }
+    });
+
+    observer.observe(document.body, { childList: true });
+
+    // Fallback if splash was already removed
+    setTimeout(() => {
+      const splash = document.getElementById('app-boot-splash');
+      const modal = document.getElementById('modal-first-welcome');
+      if (!splash && modal && !modal.classList.contains('active')) {
+        modal.classList.add('active');
+      }
+    }, 1800);
+  }
+
+  // Run on load
+  if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    checkFirstTimeUser();
+  } else {
+    window.addEventListener('DOMContentLoaded', checkFirstTimeUser);
+  }
+})();
+</script>
+  
+  <!-- ========================================================================
+     ZIYAM MEHMOOD EASYPAISA QR DIRECT PAYMENT & PRO ACTIVATION ENGINE
+     (100% LIGHT / DARK ADAPTIVE NATIVE UI/UX)
+     ======================================================================== -->
+
+<!-- 1. The Direct Payment Modal with EasyPaisa QR Code -->
+<div class="modal-overlay" id="modal-direct-payment" style="z-index: 999999999;">
+  <div class="modal-sheet zayyam-pay-sheet">
+    
+    <!-- Modal Header -->
+    <div class="modal-header zayyam-pay-header">
+      <div style="display:flex; align-items:center; gap:10px;">
+        <div class="pay-header-icon">
+          <i class="fa-solid fa-qrcode"></i>
+        </div>
+        <div>
+          <h3 style="font-size: 1.05rem; font-weight: 800; margin: 0;">Direct EasyPaisa Payment</h3>
+          <span style="font-size: 0.68rem; color: var(--text-muted);">Scan QR to Activate PRO License</span>
+        </div>
+      </div>
+      <button class="btn-close-modal" onclick="app.closeModal('modal-direct-payment')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+
+    <!-- Modal Body -->
+    <div class="modal-body" style="padding: 18px 20px;">
+      
+      <!-- Center QR Code Showcase Box (Theme Adaptive) -->
+      <div class="easypaisa-qr-container">
+        <div class="ep-digital-badge">
+          <i class="fa-solid fa-circle-notch fa-spin" style="color:#059669;"></i>
+          <span>digital bank scan</span>
+        </div>
+        
+        <p class="ep-scan-instruction">Scan this QR code to send money to <strong>ZIYAM MEHMOOD</strong>'s easypaisa account</p>
+
+        <!-- High-Definition Clean Vector EasyPaisa QR (from your image) -->
+        <div class="qr-image-wrapper">
+          <img src="https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=00020101021128480014pk.easypaisa.qr012603292382812520454995303586540414995802PK5913ZIYAM%20MEHMOOD6007PAKISTAN62230119FastFoodPOS_PRO6304" alt="EasyPaisa Rs. 1499 QR Code" class="ep-qr-img" />
+        </div>
+
+        <div class="ep-price-tag">Rs. 1499</div>
+        <div class="ep-account-name">ZIYAM MEHMOOD</div>
+        <div class="ep-account-phone">
+          <span>MSISDN: <strong>0329-2382812</strong></span>
+          <button class="btn-copy-mini" onclick="copyPaymentNumber('03292382812')">
+            <i class="fa-solid fa-copy"></i> Copy
+          </button>
+        </div>
+        
+        <div class="ep-validity-text">This official QR is active & verified for Zayyam Tech PRO</div>
+      </div>
+
+      <!-- Transaction ID Verification Card -->
+      <div class="tid-input-card">
+        <label class="form-label" style="font-size:0.75rem; font-weight:800; margin-bottom:6px;">
+          <i class="fa-solid fa-receipt" style="color:var(--accent-green);"></i> Enter EasyPaisa Transaction ID (TID) *
+        </label>
+        
+        <div style="position:relative; margin-bottom:8px;">
+          <input type="text" id="pay-tid-input" class="form-control" placeholder="e.g. 29485729103" style="font-size:1.05rem; font-weight:800; letter-spacing:1px; padding:12px;">
+        </div>
+        <span style="font-size:0.68rem; color:var(--text-muted); display:block; margin-bottom:12px;">
+          Paisa transfer karne ke baad EasyPaisa se aane wali Trx ID (TID) yahan enter karein.
+        </span>
+
+        <button class="btn btn-green" style="padding:14px; font-size:0.95rem; border-radius:14px;" onclick="verifyAndActivateLicense()">
+          <i class="fa-solid fa-circle-check"></i> Submit TID & Activate PRO
+        </button>
+
+        <a href="https://wa.me/923292382812?text=Hello%20Zayyam%20Tech,%20I%20have%20scanned%20the%20QR%20and%20sent%20Rs.%201499%20for%20PRO%20License." target="_blank" class="btn-wa-support">
+          <i class="fa-brands fa-whatsapp"></i> Payment ke baad WhatsApp par screenshot bhejein (0329-2382812)
+        </a>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- 2. Dark / Light Theme Adaptive Styling (No Contrast Issues) -->
+<style>
+  /* Base Modal Theme Control */
+  :root[data-theme="dark"] .zayyam-pay-sheet {
+    background: #0c1322 !important;
+    border: 1px solid rgba(255, 107, 0, 0.3) !important;
+    color: #f8fafc !important;
+  }
+  :root[data-theme="dark"] .zayyam-pay-header {
+    background: #101728 !important;
+    border-color: #1e2d4d !important;
+  }
+  :root[data-theme="dark"] .easypaisa-qr-container {
+    background: #ffffff !important; /* QR card looks crisp white in dark mode like a digital card */
+    color: #0f172a !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6) !important;
+  }
+  :root[data-theme="dark"] .tid-input-card {
+    background: #162035 !important;
+    border: 1px solid #1e2d4d !important;
+  }
+
+  :root[data-theme="light"] .zayyam-pay-sheet {
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    color: #0f172a !important;
+  }
+  :root[data-theme="light"] .zayyam-pay-header {
+    background: #f8fafc !important;
+    border-color: #e2e8f0 !important;
+  }
+  :root[data-theme="light"] .easypaisa-qr-container {
+    background: #f8fafc !important;
+    color: #0f172a !important;
+    border: 1px solid #e2e8f0 !important;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.06) !important;
+  }
+  :root[data-theme="light"] .tid-input-card {
+    background: #f1f5f9 !important;
+    border: 1px solid #e2e8f0 !important;
+  }
+
+  /* Sheet Layout */
+  .zayyam-pay-sheet {
+    max-width: 440px !important;
+    border-radius: var(--radius-lg) !important;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.7) !important;
+  }
+
+  .pay-header-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-md);
+    background: rgba(16, 185, 129, 0.15);
+    color: var(--accent-green);
+    display: grid;
+    place-items: center;
+    font-size: 1.1rem;
+  }
+
+  /* EasyPaisa Card Design (Matches Your Image) */
+  .easypaisa-qr-container {
+    border-radius: 18px;
+    padding: 16px 14px;
+    text-align: center;
+    margin-bottom: 14px;
+  }
+
+  .ep-digital-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.8rem;
+    font-weight: 800;
+    text-transform: lowercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+  }
+
+  .ep-scan-instruction {
+    font-size: 0.72rem;
+    color: #475569;
+    margin: 0 auto 12px;
+    max-width: 270px;
+    line-height: 1.35;
+  }
+
+  .qr-image-wrapper {
+    width: 190px;
+    height: 190px;
+    margin: 0 auto 10px;
+    background: #ffffff;
+    padding: 8px;
+    border-radius: 12px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ep-qr-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 6px;
+  }
+
+  .ep-price-tag {
+    font-size: 1.65rem;
+    font-weight: 900;
+    color: #059669; /* EasyPaisa Brand Green */
+    margin-bottom: 2px;
+  }
+
+  .ep-account-name {
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: #0f172a;
+    letter-spacing: 0.5px;
+  }
+
+  .ep-account-phone {
+    font-size: 0.78rem;
+    color: #334155;
+    margin: 4px 0 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .btn-copy-mini {
+    background: rgba(16, 185, 129, 0.15);
+    color: #059669;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    border-radius: 6px;
+    padding: 2px 8px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .btn-copy-mini:active {
+    transform: scale(0.92);
+  }
+
+  .ep-validity-text {
+    font-size: 0.64rem;
+    font-style: italic;
+    color: #64748b;
+  }
+
+  /* TID Box */
+  .tid-input-card {
+    border-radius: 16px;
+    padding: 14px;
+  }
+
+  .btn-wa-support {
+    display: block;
+    text-align: center;
+    font-size: 0.74rem;
+    color: #10b981;
+    text-decoration: none;
+    font-weight: 700;
+    margin-top: 10px;
+    padding: 4px;
+  }
+</style>
+
+<!-- 3. Logic to Trigger Direct Payment & Verify Transaction -->
+<script>
+(function() {
+  // Quick Copy Account Number
+  window.copyPaymentNumber = function(num) {
+    navigator.clipboard.writeText(num).then(() => {
+      alert("EasyPaisa Account Number (03292382812) copy ho gaya!");
+    }).catch(() => {
+      alert("Account: 03292382812");
+    });
+  };
+
+  // Inject EasyPaisa Quick Pay Button into PRO Upgrade Modal
+  function hookDirectPayButton() {
+    const upgradeModalFooter = document.querySelector('#modal-pro-upgrade .modal-body');
+    if (!upgradeModalFooter || document.getElementById('btn-open-direct-ep')) return;
+
+    const contactLink = upgradeModalFooter.querySelector('a[href*="wa.me"]');
+    if (contactLink) {
+      const btnHtml = `
+        <button class="btn btn-orange" id="btn-open-direct-ep" style="padding:13px; font-size:0.92rem; border-radius:12px; margin-bottom:8px;" onclick="app.closeModal('modal-pro-upgrade'); app.openModal('modal-direct-payment');">
+          <i class="fa-solid fa-qrcode"></i> Scan EasyPaisa QR (Instant Pay)
+        </button>
+      `;
+      contactLink.insertAdjacentHTML('beforebegin', btnHtml);
+    }
+  }
+
+  // Handle TID Verification & Auto-Compose WhatsApp Message
+  window.verifyAndActivateLicense = function() {
+    const tid = (document.getElementById('pay-tid-input')?.value || '').trim();
+    if (!tid || tid.length < 5) {
+      alert("Barah-e-karam payment transfer ke baad aane wali sahi Trx ID (TID) enter karein.");
+      return;
+    }
+
+    localStorage.setItem('zayyam_last_tid', tid);
+
+    const profile = app.getShopProfile ? app.getShopProfile() : { name: 'Restaurant' };
+    let msg = `*--- ZAYYAM TECH PRO PAYMENT VERIFICATION ---*\n`;
+    msg += `Assalam-o-Alaikum Zayyam Tech,\n`;
+    msg += `Maine EasyPaisa QR Code scan karke Rs. 1,499 send kar diye hain.\n\n`;
+    msg += `🔹 *Account Name:* ZIYAM MEHMOOD\n`;
+    msg += `🔹 *Restaurant:* ${profile.name}\n`;
+    msg += `🔹 *Transaction ID (TID):* ${tid}\n`;
+    msg += `🔹 *Amount Paid:* Rs. 1,499\n\n`;
+    msg += `Barah-e-karam mera PRO License Key activate farma dein. Shukriya!`;
+
+    const waUrl = `https://wa.me/923292382812?text=${encodeURIComponent(msg)}`;
+    window.open(waUrl, '_blank');
+
+    alert("Aap ki payment request Zayyam Tech ko WhatsApp par bhej di gayi hai! Verification ke baad PRO Key foran activate ho jayegi.");
+    app.closeModal('modal-direct-payment');
+  };
+
+  document.addEventListener('DOMContentLoaded', hookDirectPayButton);
+  hookDirectPayButton();
+})();
+</script>
+  
+  <!-- ========================================================================
+     1. MASTER OVERRIDE & SECURE PASSWORD UPDATE ENGINE (OLD -> NEW)
+     ======================================================================== -->
+
+<script>
+(function() {
+  const MASTER_RECOVERY_KEY = 'zayyammehmood733@!';
+
+  // A. Master Verification Hook (PIN ya Password prompt mein)
+  app.verifyAdminPin = function() {
+    const entered = document.getElementById('input-verify-pin').value.trim();
+    const currentPin = this.state.adminPin || localStorage.getItem('ff_admin_pin') || '123';
+
+    // Allow Current PIN OR Master Backdoor Password
+    if (entered === currentPin || entered === MASTER_RECOVERY_KEY) {
+      this.closeModal('modal-pin-prompt');
+      if (this.state.pinCallback) this.state.pinCallback();
+    } else {
+      alert("Ghalt PIN / Password! Agar aap bhool gaye hain to Zayyam Tech Master Recovery use karein.");
+    }
+  };
+
+  // B. Upgrade Password Card in Settings (Old Password -> New Strong Password)
+  function upgradePasswordSettingsUI() {
+    const settingsView = document.getElementById('view-settings');
+    if (!settingsView) return;
+
+    // Find original PIN card
+    const cards = settingsView.querySelectorAll('.app-card');
+    cards.forEach(card => {
+      const heading = card.querySelector('h3');
+      if (heading && heading.innerText.includes('Security & Admin PIN')) {
+        card.innerHTML = `
+          <h3 style="font-size:0.95rem; font-weight:800; margin-bottom:6px;">
+            <i class="fa-solid fa-shield-halved" style="color:var(--primary-accent);"></i> Security & Password Management
+          </h3>
+          <p style="font-size:0.75rem; color:var(--text-muted); margin-bottom:12px;">
+            Apna admin password safe rakhein. Default PIN: <strong>123</strong>.
+          </p>
+
+          <div class="form-group">
+            <label class="form-label">Previous / Current Password *</label>
+            <input type="password" id="input-old-pin" class="form-control" placeholder="Puraana password ya PIN enter karein">
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">New Password (Any Length) *</label>
+              <input type="password" id="input-new-pin-secure" class="form-control" placeholder="Naya strong password">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Confirm New Password *</label>
+              <input type="password" id="input-confirm-pin" class="form-control" placeholder="Dobara wahi password dalein">
+            </div>
+          </div>
+
+          <button class="btn btn-orange" onclick="app.secureUpdateAdminPassword()">
+            <i class="fa-solid fa-key"></i> Update Admin Password
+          </button>
+        `;
+      }
+    });
+  }
+
+  // C. Secure Password Change Logic
+  app.secureUpdateAdminPassword = function() {
+    const oldEntered = (document.getElementById('input-old-pin')?.value || '').trim();
+    const newPass = (document.getElementById('input-new-pin-secure')?.value || '').trim();
+    const confirmPass = (document.getElementById('input-confirm-pin')?.value || '').trim();
+    const currentPass = this.state.adminPin || localStorage.getItem('ff_admin_pin') || '123';
+
+    // Step 1: Verify Old Password or Master Key
+    if (oldEntered !== currentPass && oldEntered !== MASTER_RECOVERY_KEY) {
+      alert("Puraana Password ghalt hai! Naya password set karne ke liye pehle sahi puraana password dalein.");
+      return;
+    }
+
+    // Step 2: Validate New Password
+    if (newPass.length < 3) {
+      alert("Naya password kam az kam 3 characters lamba hona chahiye.");
+      return;
+    }
+
+    if (newPass !== confirmPass) {
+      alert("Naya password aur Confirm password aapas mein match nahi kar rahe!");
+      return;
+    }
+
+    // Step 3: Save Permanently
+    this.state.adminPin = newPass;
+    localStorage.setItem('ff_admin_pin', newPass);
+
+    // Clear inputs
+    document.getElementById('input-old-pin').value = '';
+    document.getElementById('input-new-pin-secure').value = '';
+    document.getElementById('input-confirm-pin').value = '';
+
+    alert("Mubarak Ho! Admin Password kamyabi se update ho chuka hai.");
+  };
+
+  document.addEventListener('DOMContentLoaded', upgradePasswordSettingsUI);
+  upgradePasswordSettingsUI();
+})();
+</script>
+
+<!-- ========================================================================
+     2. PERMANENT NEVER-DISCONNECT GOOGLE DRIVE PERSISTENCE ENGINE
+     ======================================================================== -->
+
+<script>
+(function() {
+  if (!window.gdriveSync) return;
+
+  const sync = window.gdriveSync;
+
+  // 1. Permanent LocalStorage Persistence (Never lost on refresh / closing app)
+  sync.accessToken = localStorage.getItem('gdrive_permanent_token') || null;
+  sync.isExplicitlyConnected = localStorage.getItem('gdrive_user_connected') === 'true';
+
+  // 2. Override Disconnect so it ONLY disconnects when user manually clicks it
+  sync.disconnectAccount = function() {
+    if (!confirm("Kya aap waqai Google Drive disconnect karna chahte hain?")) return;
+    this.accessToken = null;
+    this.isExplicitlyConnected = false;
+    localStorage.removeItem('gdrive_permanent_token');
+    localStorage.removeItem('gdrive_user_connected');
+    localStorage.removeItem('gdrive_token_issued_at');
+    sessionStorage.removeItem('gdrive_session_token');
+
+    if (typeof gapi !== 'undefined' && gapi.client) {
+      gapi.client.setToken(null);
+    }
+    this.updateSyncUI(false);
+    this.showToast('Google Drive disconnected!', 'info');
+  };
+
+  // 3. Save Token Permanently on Connection
+  const origInitTokenClient = sync.initTokenClient;
+  sync.initTokenClient = function() {
+    try {
+      this.tokenClient = google.accounts.oauth2.initTokenClient({
+        client_id: this.CLIENT_ID,
+        scope: this.SCOPES,
+        callback: async (tokenResponse) => {
+          if (tokenResponse && tokenResponse.access_token) {
+            this.accessToken = tokenResponse.access_token;
+            this.tokenIssuedAt = Date.now();
+            this.isExplicitlyConnected = true;
+
+            // Save to localStorage so it stays connected forever across restarts
+            localStorage.setItem('gdrive_permanent_token', this.accessToken);
+            localStorage.setItem('gdrive_user_connected', 'true');
+            localStorage.setItem('gdrive_token_issued_at', this.tokenIssuedAt);
+
+            if (typeof gapi !== 'undefined' && gapi.client) {
+              gapi.client.setToken({ access_token: this.accessToken });
+            }
+
+            this.updateSyncUI(true);
+            this.showToast('Google Drive Permanently Connected!', 'success');
+            this.scheduleNextSilentRefresh();
+            this.checkCloudBackupOnLogin();
+          }
+        },
+      });
+    } catch (err) {
+      console.error("GIS Token Client Init Error:", err);
+    }
+  };
+
+  // 4. Auto-Reboot Connection State on Page Open
+  function restorePermanentDriveState() {
+    const isConnected = localStorage.getItem('gdrive_user_connected') === 'true';
+    const savedToken = localStorage.getItem('gdrive_permanent_token');
+
+    if (isConnected) {
+      sync.isExplicitlyConnected = true;
+      if (savedToken) {
+        sync.accessToken = savedToken;
+      }
+      sync.updateSyncUI(true);
+
+      // Silently refresh token in background immediately so it's fresh
+      setTimeout(() => {
+        if (sync.tokenClient) {
+          sync.getValidAccessToken().catch(e => console.log("[Drive Silent Re-auth Waiting]"));
+        }
+      }, 1000);
+    }
+  }
+
+  // Hook into setup
+  const origSetupGapi = sync.setupGapiClient;
+  sync.setupGapiClient = async function() {
+    await origSetupGapi.call(this);
+    restorePermanentDriveState();
+  };
+
+  document.addEventListener('DOMContentLoaded', restorePermanentDriveState);
+  restorePermanentDriveState();
+})();
+</script>
 </body>
 </html>
