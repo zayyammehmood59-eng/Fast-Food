@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ur" dir="ltr" data-theme="dark">
 <head>
@@ -550,6 +549,182 @@
   </style>
 </head>
 <body>
+  
+  <!-- ========================================================================
+     INSTANT FIRST-RENDER SPLASH SCREEN (LIGHT / DARK AUTO ADAPTIVE)
+     ======================================================================== -->
+<style id="boot-splash-critical-css">
+  /* Instant Hide background content while loading */
+  html.is-booting body > *:not(#app-boot-splash) {
+    visibility: hidden !important;
+  }
+
+  /* Base Splash Container */
+  #app-boot-splash {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 9999999 !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    transition: opacity 0.45s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.45s ease;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  /* 1. DARK MODE SPLASH (Default or when theme is dark) */
+  #app-boot-splash.theme-dark {
+    background-color: #080d1a !important;
+    color: #f8fafc !important;
+  }
+  #app-boot-splash.theme-dark .splash-track {
+    background: #162035;
+  }
+  #app-boot-splash.theme-dark .splash-sub {
+    color: #94a3b8;
+  }
+  #app-boot-splash.theme-dark .splash-status {
+    color: #64748b;
+  }
+
+  /* 2. LIGHT MODE SPLASH (When user selected Light Theme in Settings) */
+  #app-boot-splash.theme-light {
+    background-color: #f3f6fa !important;
+    color: #0f172a !important;
+  }
+  #app-boot-splash.theme-light .splash-track {
+    background: #e2e8f0;
+  }
+  #app-boot-splash.theme-light .splash-sub {
+    color: #475569;
+  }
+  #app-boot-splash.theme-light .splash-status {
+    color: #64748b;
+  }
+
+  /* Splash Inner Box */
+  .splash-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 28px;
+    width: 90%;
+    max-width: 320px;
+  }
+
+  /* Glowing Restaurant Animated Logo */
+  .splash-icon-wrapper {
+    width: 84px;
+    height: 84px;
+    border-radius: 26px;
+    background: linear-gradient(135deg, #ff6b00, #ff8f00);
+    display: grid;
+    place-items: center;
+    box-shadow: 0 12px 32px rgba(255, 107, 0, 0.42);
+    margin-bottom: 20px;
+    animation: splashGlowPulse 2s infinite ease-in-out;
+  }
+
+  .splash-icon-wrapper i {
+    font-size: 2.3rem;
+    color: #ffffff;
+  }
+
+  .splash-title {
+    font-size: 1.35rem;
+    font-weight: 800;
+    margin: 0 0 4px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  .splash-sub {
+    font-size: 0.74rem;
+    font-weight: 500;
+    margin: 0 0 24px;
+  }
+
+  /* Smooth Progress Bar */
+  .splash-track {
+    width: 100%;
+    height: 5px;
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
+    margin-bottom: 10px;
+  }
+
+  .splash-bar {
+    height: 100%;
+    width: 15%;
+    border-radius: 10px;
+    background: linear-gradient(90deg, #ff6b00, #10b981);
+    transition: width 0.28s ease;
+  }
+
+  .splash-status {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+  }
+
+  @keyframes splashGlowPulse {
+    0%, 100% {
+      transform: scale(1);
+      box-shadow: 0 10px 28px rgba(255, 107, 0, 0.38);
+    }
+    50% {
+      transform: scale(1.07);
+      box-shadow: 0 16px 38px rgba(255, 107, 0, 0.65);
+    }
+  }
+</style>
+
+<!-- Pure Synchronous Theme Pre-Check (Zero-Delay Execution) -->
+<script>
+  (function() {
+    // 1. Immediately apply html bootlock
+    document.documentElement.classList.add('is-booting');
+
+    // 2. Read saved theme from Settings
+    var savedTheme = localStorage.getItem('ff_theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+
+    // 3. Mark splash class ahead of render
+    window.__INIT_SPLASH_THEME__ = (savedTheme === 'light') ? 'theme-light' : 'theme-dark';
+  })();
+</script>
+
+<!-- The Splash Screen DOM -->
+<div id="app-boot-splash">
+  <div class="splash-box">
+    <div class="splash-icon-wrapper">
+      <i class="fa-solid fa-burger"></i>
+    </div>
+    <h2 class="splash-title" id="splash-shop-name">FAST FOOD POS</h2>
+    <p class="splash-sub" id="splash-shop-desc">Restaurant Management System</p>
+    
+    <div class="splash-track">
+      <div class="splash-bar" id="splash-progress-fill"></div>
+    </div>
+    <span class="splash-status" id="splash-status-text">Starting system...</span>
+  </div>
+</div>
+
+<script>
+  // Apply initial theme class to splash element before paint
+  (function() {
+    var el = document.getElementById('app-boot-splash');
+    if (el && window.__INIT_SPLASH_THEME__) {
+      el.className = window.__INIT_SPLASH_THEME__;
+    }
+  })();
+</script>
 
   <!-- TOP BAR -->
   <header class="top-bar">
@@ -591,7 +766,7 @@
     <section id="view-dashboard" class="view-content active">
       <div class="quick-actions">
         <button class="btn-quick" onclick="app.navigateTo('pos')"><i class="fa-solid fa-plus-circle"></i> New Sale</button>
-        <button class="btn-quick" onclick="app.openHeldOrdersModal()"><i class="fa-solid fa-clock-rotate-left"></i> Held (<span id="dash-held-count">0</span>)</button>
+        <button class="btn-quick" onclick="app.openHeldOrdersModal()"><i class="fa-solid fa-clock-rotate-left"></i> Hold </button>
         <button class="btn-quick" onclick="app.requestAdminAuth(() => app.openAddProductModal())"><i class="fa-solid fa-utensils"></i> Add Food</button>
         <button class="btn-quick" onclick="app.navigateTo('recovery')"><i class="fa-solid fa-money-bill-wave"></i> Daily Recovery</button>
         <button class="btn-quick" onclick="app.openPurchaseModal()"><i class="fa-solid fa-truck"></i> Purchase Bill</button>
@@ -678,7 +853,9 @@
       <div class="products-grid" id="pos-products-container"></div>
     </section>
 
-    <!-- 3. CUSTOMER KHATA -->
+    <!-- 3. 
+
+ATA -->
     <section id="view-customers" class="view-content">
       <!-- 3-Part Customer Khata Breakdown -->
       <div class="stats-grid" style="grid-template-columns: repeat(3, 1fr); gap:6px; margin-bottom:12px;">
@@ -1762,7 +1939,7 @@
         const titles = {
           dashboard: 'Fast Food POS',
           pos: 'New Fast Food Sale',
-          customers: 'Customer Khata & Udhar',
+          customers: 'Customer Khata',
           inventory: 'Stock & Costing',
           more: 'Management Hub',
           categories: 'Menu Categories',
@@ -5777,7 +5954,7 @@
           <!-- Master Cash In Hand Result Card -->
           <div class="app-card" style="background: linear-gradient(135deg, rgba(16,185,129,0.15), rgba(5,150,105,0.05)); border: 2px solid var(--accent-green); padding: 16px; margin-bottom: 12px; text-align:center;">
             <span style="font-size:0.75rem; text-transform:uppercase; font-weight:800; color:var(--text-muted); letter-spacing:1px;">
-              Net Cash In Hand (ہاتھ میں خالص کیش)
+              Net Cash In Hand 
             </span>
             <div id="cih-net-total" style="font-size:2.2rem; font-weight:800; color:var(--accent-green); margin: 6px 0;">
               Rs. 0
@@ -6093,7 +6270,7 @@
         originalNavigateTo.call(this, viewId, pushHistory);
 
         if (viewId === 'cashinhand') {
-          document.getElementById('topbar-title').innerText = 'Cash in Hand (ہاتھ کا کیش)';
+          document.getElementById('topbar-title').innerText = 'Cash in Hand ';
           const backBtn = document.getElementById('btn-top-back');
           if (backBtn) backBtn.style.display = 'grid';
           this.renderCashInHand();
@@ -7633,7 +7810,7 @@
               ٹوکن نمبر ہر روز صبح خودکار طور پر <strong>#1</strong> سے شروع ہوتا ہے۔ ضرورت پڑنے پر آپ نیچے سے مینول ری سیٹ بھی کر سکتے ہیں۔
             </p>
             <button class="btn btn-outline" style="border-color:var(--accent-amber); color:var(--accent-amber);" onclick="app.resetTokenManually()">
-              <i class="fa-solid fa-rotate-left"></i> Reset Token to #1 (ٹوکن ری سیٹ کریں)
+              <i class="fa-solid fa-rotate-left"></i> Reset Token to #1 
             </button>
           </div>
         `;
@@ -8196,5 +8373,1182 @@
   };
 })();
 </script>
+  
+  <!-- ========================================================================
+     HIDE TAGLINE FROM TOP HEADER (KEEP ONLY IN PRINTABLE BILL)
+     ======================================================================== -->
+<style>
+  /* Top-Bar / Header se tagline ko mukammal chupa diya gaya hai */
+  .top-bar .brand-meta #topbar-sub,
+  #topbar-sub {
+    display: none !important;
+  }
+
+  /* Header Brand Name ki alignment ko clean aur compact rakhne ke liye */
+  .brand-meta h1 {
+    font-size: 1.05rem !important;
+    line-height: 1.2 !important;
+    margin: 0 !important;
+  }
+</style>
+
+<script>
+(function() {
+  // Ensure JavaScript topbar updater doesn't put tagline in header
+  if (window.app) {
+    const originalApplyShopProfileUI = app.applyShopProfileUI;
+    app.applyShopProfileUI = function() {
+      if (originalApplyShopProfileUI) {
+        originalApplyShopProfileUI.call(this);
+      }
+      // Explicitly clear tagline text from header
+      const topbarSub = document.getElementById('topbar-sub');
+      if (topbarSub) {
+        topbarSub.innerText = '';
+        topbarSub.style.display = 'none';
+      }
+    };
+
+    // Immediate run
+    app.applyShopProfileUI();
+  }
+})();
+</script>
+  <!-- ========================================================================
+     SPLASH SCREEN TERMINATION & READY DISPATCHER
+     ======================================================================== -->
+<script>
+(function() {
+  var splash = document.getElementById('app-boot-splash');
+  var fill = document.getElementById('splash-progress-fill');
+  var status = document.getElementById('splash-status-text');
+  var nameEl = document.getElementById('splash-shop-name');
+
+  // Load shop profile name if configured
+  try {
+    var profile = JSON.parse(localStorage.getItem('ff_shop_profile_v1'));
+    if (profile && profile.name && nameEl) {
+      nameEl.innerText = profile.name;
+    }
+  } catch (e) {}
+
+  function updateStatus(pct, msg) {
+    if (fill) fill.style.width = pct + '%';
+    if (status) status.innerText = msg;
+  }
+
+  updateStatus(35, 'Loading local database...');
+
+  // Intelligent Readiness Poller
+  var checkReadyInterval = setInterval(function() {
+    var isAppLoaded = window.app && app.state && app.state.products && Array.isArray(app.state.products);
+    var isDomReady = document.readyState === 'complete' || document.readyState === 'interactive';
+
+    if (isAppLoaded && isDomReady) {
+      clearInterval(checkReadyInterval);
+      updateStatus(75, 'Syncing accounts & menus...');
+
+      setTimeout(function() {
+        updateStatus(100, 'System ready!');
+
+        setTimeout(function() {
+          if (splash) {
+            splash.style.opacity = '0';
+            splash.style.visibility = 'hidden';
+            
+            // Release background lock
+            document.documentElement.classList.remove('is-booting');
+            
+            setTimeout(function() {
+              if (splash && splash.parentNode) splash.remove();
+              var css = document.getElementById('boot-splash-critical-css');
+              if (css) css.remove();
+            }, 450);
+          }
+        }, 180);
+      }, 200);
+    }
+  }, 80);
+
+  // Hard safety timeout: Kabhi bhi screen 2.5 second se zyada freeze na ho
+  setTimeout(function() {
+    if (splash && splash.parentNode) {
+      updateStatus(100, 'Starting...');
+      splash.style.opacity = '0';
+      splash.style.visibility = 'hidden';
+      document.documentElement.classList.remove('is-booting');
+      setTimeout(function() {
+        if (splash && splash.parentNode) splash.remove();
+      }, 450);
+    }
+  }, 2500);
+})();
+</script>
+  
+ <!-- ========================================================================
+     HEADER LOGO ROLLING ROLL-OUT & NAME REVEAL CINEMATIC ENGINE
+     ======================================================================== -->
+
+<style>
+  /* Header Brand Group Layout Adjustment */
+  .top-bar .brand-group {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    overflow: hidden;
+    padding: 2px 4px;
+    cursor: pointer;
+  }
+
+  /* Rolling Header Logo */
+  .top-bar .brand-icon {
+    position: relative;
+    z-index: 10;
+    transition: transform 1.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.4s ease;
+    will-change: transform;
+    flex-shrink: 0;
+  }
+
+  /* The Brand Title Mask Container */
+  .top-bar .brand-meta {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .top-bar .brand-meta h1 {
+    display: inline-block;
+    white-space: nowrap;
+    transition: clip-path 1.1s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.8s ease, transform 0.8s ease;
+    will-change: clip-path, opacity, transform;
+    /* Default revealed state */
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0% 100%);
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  /* ----------------------------------------------------
+     ANIMATION STATES TRIGGERED BY JAVASCRIPT
+     ---------------------------------------------------- */
+
+  /* State 1: Hidden state before animation starts */
+  .brand-group.anim-ready .brand-meta h1 {
+    clip-path: polygon(0 0, 0 0, 0 100%, 0% 100%);
+    opacity: 0;
+    transform: translateX(-15px);
+  }
+
+  /* State 2: Logo Roll-Out (Ghoomte hue aage nikalna aur naam likhna) */
+  .brand-group.anim-rolling-forward .brand-icon {
+    transform: translateX(110px) rotate(360deg) scale(1.08);
+    box-shadow: 0 4px 18px rgba(255, 107, 0, 0.6);
+  }
+
+  .brand-group.anim-rolling-forward .brand-meta h1 {
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0% 100%);
+    opacity: 1;
+    transform: translateX(0);
+    transition-delay: 0.2s;
+  }
+
+  /* State 3: Logo Roll-Back (Wapis ghoom kar apni jagah aana) */
+  .brand-group.anim-rolling-backward .brand-icon {
+    transform: translateX(0) rotate(0deg) scale(1);
+    box-shadow: none;
+  }
+</style>
+
+<script>
+(function() {
+  function initHeaderRollingAnimation() {
+    const brandGroup = document.querySelector('.top-bar .brand-group');
+    const brandIcon = document.querySelector('.top-bar .brand-icon');
+    const brandTitle = document.getElementById('topbar-title');
+
+    if (!brandGroup || !brandIcon || !brandTitle) return;
+
+    // Logo click/tap par dubara animation chalayein
+    brandGroup.setAttribute('title', 'Tap to animate logo');
+    brandGroup.addEventListener('click', function() {
+      playLogoRollSequence(brandGroup);
+    });
+
+    // App open hone ke baad jab splash screen khatam ho to pehli dafa auto-play karein
+    const splashObserver = new MutationObserver(function() {
+      const splash = document.getElementById('app-boot-splash');
+      if (!splash) {
+        splashObserver.disconnect();
+        setTimeout(function() {
+          playLogoRollSequence(brandGroup);
+        }, 300);
+      }
+    });
+
+    splashObserver.observe(document.body, { childList: true });
+
+    // Fallback trigger agar splash pehle hi remove ho chuki ho
+    setTimeout(function() {
+      if (!brandGroup.dataset.animatedOnce) {
+        playLogoRollSequence(brandGroup);
+      }
+    }, 1800);
+  }
+
+  function playLogoRollSequence(brandGroup) {
+    brandGroup.dataset.animatedOnce = "true";
+
+    // Step A: Set initial ready state
+    brandGroup.classList.remove('anim-rolling-forward', 'anim-rolling-backward');
+    brandGroup.classList.add('anim-ready');
+
+    // Step B: Roll Forward & Reveal Name
+    setTimeout(function() {
+      brandGroup.classList.remove('anim-ready');
+      brandGroup.classList.add('anim-rolling-forward');
+
+      // Step C: Hold for a moment, then Roll Back smoothly to original position
+      setTimeout(function() {
+        brandGroup.classList.add('anim-rolling-backward');
+
+        // Cleanup temporary animation classes after finish
+        setTimeout(function() {
+          brandGroup.classList.remove('anim-rolling-forward', 'anim-rolling-backward');
+        }, 1200);
+      }, 1400); // 1.4 sec wait while logo is forward
+    }, 150);
+  }
+
+  // Auto initialize on DOM ready
+  if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    initHeaderRollingAnimation();
+  } else {
+    window.addEventListener('DOMContentLoaded', initHeaderRollingAnimation);
+  }
+})();
+</script>
+  
+  <!-- ========================================================================
+     ULTRA-PREMIUM RETINA FINTECH GRAPH ENGINE (SALES & ORDERS)
+     ======================================================================== -->
+
+<style>
+  /* Premium Graph Container Styling */
+  .premium-chart-card {
+    background: var(--card-gradient) !important;
+    border: 1px solid var(--border-subtle) !important;
+    border-radius: var(--radius-lg) !important;
+    padding: 16px !important;
+    margin-bottom: 14px !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12) !important;
+    position: relative;
+  }
+
+  .chart-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--bg-surface-elevated);
+    padding: 3px;
+    border-radius: var(--radius-full);
+    border: 1px solid var(--border-subtle);
+  }
+
+  .chart-toggle-btn {
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 0.68rem;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: var(--radius-full);
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .chart-toggle-btn.active {
+    background: var(--primary-accent);
+    color: #ffffff;
+    box-shadow: 0 2px 8px rgba(255, 107, 0, 0.4);
+  }
+
+  .premium-canvas-wrapper {
+    position: relative;
+    width: 100%;
+    height: 190px;
+    margin-top: 12px;
+  }
+
+  /* Floating Interactive Tooltip */
+  #chart-floating-tooltip {
+    position: absolute;
+    display: none;
+    pointer-events: none;
+    background: rgba(16, 23, 40, 0.94);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    color: #ffffff;
+    border: 1px solid rgba(255, 107, 0, 0.5);
+    border-radius: var(--radius-sm);
+    padding: 6px 10px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.5);
+    z-index: 50;
+    transform: translate(-50%, -120%);
+    white-space: nowrap;
+    transition: opacity 0.15s ease;
+  }
+</style>
+
+<script>
+(function() {
+  // Chart State
+  let chartMode = 'sales'; // 'sales' or 'orders'
+  let cachedPoints = [];
+  let isListening = false;
+
+  // 1. Upgrade Chart HTML Layout in Dashboard
+  function upgradeChartUI() {
+    const oldChartCard = document.querySelector('#view-dashboard #salesTrendChart')?.closest('.app-card');
+    if (!oldChartCard || oldChartCard.classList.contains('premium-chart-card')) return;
+
+    oldChartCard.className = 'app-card premium-chart-card';
+    oldChartCard.innerHTML = `
+      <div class="card-header" style="margin-bottom:0;">
+        <div>
+          <span class="card-title" style="font-size:0.95rem; font-weight:800;">
+            <i class="fa-solid fa-chart-line" style="color:var(--primary-accent);"></i> Sales Analytics
+          </span>
+          <div style="font-size:0.68rem; color:var(--text-muted); margin-top:2px;" id="chart-sub-label">
+            Last 7 Days Revenue Stream
+          </div>
+        </div>
+
+        <!-- Mode Switcher -->
+        <div class="chart-header-actions">
+          <button class="chart-toggle-btn active" id="btn-chart-mode-sales" onclick="window.__switchChartMode('sales')">Revenue</button>
+          <button class="chart-toggle-btn" id="btn-chart-mode-orders" onclick="window.__switchChartMode('orders')">Orders</button>
+        </div>
+      </div>
+
+      <div class="premium-canvas-wrapper" id="chart-canvas-container">
+        <canvas id="salesTrendChart"></canvas>
+        <div id="chart-floating-tooltip"></div>
+      </div>
+    `;
+
+    setupChartInteractions();
+  }
+
+  // 2. High-DPI Premium Canvas Renderer
+  app.renderSalesTrendChart = function() {
+    upgradeChartUI();
+
+    const canvas = document.getElementById('salesTrendChart');
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    const dpr = window.devicePixelRatio || 2;
+    const rect = canvas.getBoundingClientRect();
+
+    if (rect.width === 0) return;
+
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    ctx.scale(dpr, dpr);
+
+    const width = rect.width;
+    const height = rect.height;
+
+    // Gather last 7 days data
+    const days = [];
+    const salesData = [];
+    const ordersData = [];
+
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const dateStr = d.toISOString().slice(0, 10);
+      const dayName = d.toLocaleDateString('en-US', { weekday: 'short' });
+      days.push(dayName);
+
+      let dayTotal = 0;
+      let dayOrders = 0;
+
+      (app.state.sales || []).forEach(s => {
+        if (s.date && s.date.startsWith(dateStr)) {
+          dayTotal += (s.grandTotal || 0);
+          dayOrders += 1;
+        }
+      });
+
+      salesData.push(dayTotal);
+      ordersData.push(dayOrders);
+    }
+
+    const isRevenue = chartMode === 'sales';
+    const activeData = isRevenue ? salesData : ordersData;
+    const maxVal = Math.max(...activeData, isRevenue ? 1000 : 5);
+
+    // Padding & dimensions
+    const pad = { top: 25, right: 15, bottom: 25, left: 15 };
+    const chartW = width - pad.left - pad.right;
+    const chartH = height - pad.top - pad.bottom;
+
+    ctx.clearRect(0, 0, width, height);
+
+    // Dynamic grid colors based on theme
+    const isDark = (app.state.theme || localStorage.getItem('ff_theme')) !== 'light';
+    const gridColor = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)';
+    const textMuted = isDark ? '#64748b' : '#94a3b8';
+
+    // Draw Subtle Horizontal Grid Lines
+    ctx.strokeStyle = gridColor;
+    ctx.lineWidth = 1;
+    for (let i = 0; i <= 3; i++) {
+      const y = pad.top + (chartH / 3) * i;
+      ctx.beginPath();
+      ctx.moveTo(pad.left, y);
+      ctx.lineTo(width - pad.right, y);
+      ctx.stroke();
+    }
+
+    // Calculate Curve Points
+    const stepX = chartW / (days.length - 1);
+    cachedPoints = activeData.map((val, idx) => ({
+      x: pad.left + idx * stepX,
+      y: pad.top + chartH - (val / maxVal) * chartH,
+      val: val,
+      day: days[idx],
+      orders: ordersData[idx],
+      sales: salesData[idx]
+    }));
+
+    // Draw Gradient Glowing Area
+    const gradient = ctx.createLinearGradient(0, pad.top, 0, height - pad.bottom);
+    if (isRevenue) {
+      gradient.addColorStop(0, 'rgba(255, 107, 0, 0.38)');
+      gradient.addColorStop(0.6, 'rgba(255, 107, 0, 0.08)');
+      gradient.addColorStop(1, 'rgba(255, 107, 0, 0.0)');
+    } else {
+      gradient.addColorStop(0, 'rgba(59, 130, 246, 0.38)');
+      gradient.addColorStop(0.6, 'rgba(59, 130, 246, 0.08)');
+      gradient.addColorStop(1, 'rgba(59, 130, 246, 0.0)');
+    }
+
+    ctx.beginPath();
+    ctx.moveTo(cachedPoints[0].x, cachedPoints[0].y);
+    for (let i = 1; i < cachedPoints.length; i++) {
+      const prev = cachedPoints[i - 1];
+      const cur = cachedPoints[i];
+      const cpX = (prev.x + cur.x) / 2;
+      ctx.bezierCurveTo(cpX, prev.y, cpX, cur.y, cur.x, cur.y);
+    }
+    ctx.lineTo(cachedPoints[cachedPoints.length - 1].x, height - pad.bottom);
+    ctx.lineTo(cachedPoints[0].x, height - pad.bottom);
+    ctx.closePath();
+    ctx.fillStyle = gradient;
+    ctx.fill();
+
+    // Draw Crisp Glowing Stroke Line
+    const strokeColor = isRevenue ? '#ff6b00' : '#3b82f6';
+    ctx.beginPath();
+    ctx.moveTo(cachedPoints[0].x, cachedPoints[0].y);
+    for (let i = 1; i < cachedPoints.length; i++) {
+      const prev = cachedPoints[i - 1];
+      const cur = cachedPoints[i];
+      const cpX = (prev.x + cur.x) / 2;
+      ctx.bezierCurveTo(cpX, prev.y, cpX, cur.y, cur.x, cur.y);
+    }
+    ctx.strokeStyle = strokeColor;
+    ctx.lineWidth = 3;
+    ctx.shadowColor = isRevenue ? 'rgba(255, 107, 0, 0.5)' : 'rgba(59, 130, 246, 0.5)';
+    ctx.shadowBlur = 10;
+    ctx.stroke();
+    ctx.shadowBlur = 0; // reset shadow
+
+    // Draw Nodes and Day Labels
+    ctx.font = '600 11px Plus Jakarta Sans, sans-serif';
+    ctx.textAlign = 'center';
+
+    cachedPoints.forEach((pt) => {
+      // Outer Halo Ring
+      ctx.beginPath();
+      ctx.arc(pt.x, pt.y, 5, 0, Math.PI * 2);
+      ctx.fillStyle = isDark ? '#101728' : '#ffffff';
+      ctx.fill();
+      ctx.strokeStyle = strokeColor;
+      ctx.lineWidth = 2.5;
+      ctx.stroke();
+
+      // Day Label
+      ctx.fillStyle = textMuted;
+      ctx.fillText(pt.day, pt.x, height - 6);
+    });
+  };
+
+  // 3. Interactive Touch & Hover Tooltip Listener
+  function setupChartInteractions() {
+    const container = document.getElementById('chart-canvas-container');
+    const tooltip = document.getElementById('chart-floating-tooltip');
+    if (!container || !tooltip || isListening) return;
+
+    isListening = true;
+
+    function handlePointer(clientX) {
+      if (!cachedPoints || cachedPoints.length === 0) return;
+      const rect = container.getBoundingClientRect();
+      const posX = clientX - rect.left;
+
+      // Find nearest point
+      let closest = cachedPoints[0];
+      let minDiff = Infinity;
+      cachedPoints.forEach(pt => {
+        const diff = Math.abs(pt.x - posX);
+        if (diff < minDiff) {
+          minDiff = diff;
+          closest = pt;
+        }
+      });
+
+      if (closest && minDiff < 45) {
+        tooltip.style.display = 'block';
+        tooltip.style.left = closest.x + 'px';
+        tooltip.style.top = (closest.y - 10) + 'px';
+        tooltip.innerHTML = `
+          <div style="font-size:0.68rem; color:#94a3b8; margin-bottom:2px;">${closest.day} Activity</div>
+          <div style="color:${chartMode === 'sales' ? '#ff6b00' : '#3b82f6'}; font-size:0.85rem; font-weight:800;">
+            ${chartMode === 'sales' ? 'Rs. ' + closest.sales.toLocaleString() : closest.orders + ' Orders'}
+          </div>
+          <div style="font-size:0.62rem; color:#cbd5e1;">${chartMode === 'sales' ? closest.orders + ' Orders Made' : 'Revenue: Rs. ' + closest.sales}</div>
+        `;
+      } else {
+        tooltip.style.display = 'none';
+      }
+    }
+
+    container.addEventListener('mousemove', e => handlePointer(e.clientX));
+    container.addEventListener('touchmove', e => {
+      if (e.touches && e.touches[0]) handlePointer(e.touches[0].clientX);
+    }, { passive: true });
+
+    container.addEventListener('mouseleave', () => { tooltip.style.display = 'none'; });
+    container.addEventListener('touchend', () => {
+      setTimeout(() => { tooltip.style.display = 'none'; }, 1500);
+    });
+  }
+
+  // 4. Mode Switcher Handler
+  window.__switchChartMode = function(mode) {
+    chartMode = mode;
+    const btnSales = document.getElementById('btn-chart-mode-sales');
+    const btnOrders = document.getElementById('btn-chart-mode-orders');
+    const subLabel = document.getElementById('chart-sub-label');
+
+    if (mode === 'sales') {
+      btnSales?.classList.add('active');
+      btnOrders?.classList.remove('active');
+      if (subLabel) subLabel.innerText = 'Last 7 Days Revenue Stream';
+    } else {
+      btnOrders?.classList.add('active');
+      btnSales?.classList.remove('active');
+      if (subLabel) subLabel.innerText = 'Last 7 Days Volume of Orders';
+    }
+
+    app.renderSalesTrendChart();
+  };
+
+  // Immediate Pre-Render Setup
+  window.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => {
+      if (app.currentView === 'dashboard') {
+        app.renderSalesTrendChart();
+      }
+    }, 100);
+  });
+})();
+</script>
+  
+  <!-- ========================================================================
+     ULTRA-PREMIUM TOP-SELLING FOOD LEADERBOARD & ANIMATED EMPTY STATE
+     ======================================================================== -->
+
+<style>
+  /* Leaderboard Styling */
+  .leaderboard-card {
+    background: var(--card-gradient) !important;
+    border: 1px solid var(--border-subtle) !important;
+    border-radius: var(--radius-lg) !important;
+    padding: 16px !important;
+    margin-bottom: 14px !important;
+  }
+
+  .top-item-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 12px;
+    background: var(--bg-surface-elevated);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    margin-bottom: 8px;
+    transition: transform 0.2s ease, border-color 0.2s ease;
+  }
+
+  .top-item-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--primary-accent);
+  }
+
+  .rank-badge {
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-full);
+    display: grid;
+    place-items: center;
+    font-size: 0.85rem;
+    font-weight: 800;
+    flex-shrink: 0;
+    margin-right: 12px;
+  }
+
+  .rank-1 { background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4); }
+  .rank-2 { background: linear-gradient(135deg, #94a3b8, #64748b); color: #fff; }
+  .rank-3 { background: linear-gradient(135deg, #b45309, #78350f); color: #fff; }
+  .rank-other { background: var(--bg-input); color: var(--text-muted); }
+
+  .item-meta-bar {
+    width: 100%;
+    height: 4px;
+    background: var(--bg-input);
+    border-radius: 6px;
+    overflow: hidden;
+    margin-top: 6px;
+  }
+
+  .item-meta-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary-accent), var(--accent-green));
+    border-radius: 6px;
+  }
+
+  /* Animated Empty State */
+  .empty-leaderboard-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 24px 16px;
+  }
+
+  .animated-burger-icon {
+    width: 65px;
+    height: 65px;
+    border-radius: 20px;
+    background: rgba(255, 107, 0, 0.12);
+    display: grid;
+    place-items: center;
+    font-size: 1.8rem;
+    color: var(--primary-accent);
+    margin-bottom: 12px;
+    animation: floatingBurger 2.2s infinite ease-in-out;
+    position: relative;
+  }
+
+  .animated-burger-icon::after {
+    content: '';
+    position: absolute;
+    width: 35px;
+    height: 6px;
+    background: rgba(0,0,0,0.25);
+    bottom: -10px;
+    border-radius: 50%;
+    animation: shadowPulse 2.2s infinite ease-in-out;
+  }
+
+  @keyframes floatingBurger {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-8px) rotate(3deg); }
+  }
+
+  @keyframes shadowPulse {
+    0%, 100% { transform: scale(1); opacity: 0.3; }
+    50% { transform: scale(0.7); opacity: 0.15; }
+  }
+</style>
+
+<script>
+(function() {
+  // 1. Upgrade Top Products Renderer
+  app.renderTopSellingProducts = function() {
+    const container = document.getElementById('dash-top-products-list');
+    if (!container) return;
+
+    // Outer card styling upgrade
+    const parentCard = container.closest('.app-card');
+    if (parentCard) {
+      parentCard.className = 'app-card leaderboard-card';
+      const headerTitle = parentCard.querySelector('.card-title');
+      if (headerTitle) {
+        headerTitle.innerHTML = '<i class="fa-solid fa-trophy" style="color:var(--accent-amber);"></i> Bestsellers Leaderboard';
+      }
+    }
+
+    // Comprehensive Stats Aggregator (Deep Scan)
+    const productStats = {};
+    let totalItemsSoldGlobal = 0;
+
+    (app.state.sales || []).forEach(sale => {
+      (sale.items || []).forEach(item => {
+        const key = item.id || item.name;
+        if (!productStats[key]) {
+          productStats[key] = {
+            id: item.id,
+            name: item.name || 'Food Item',
+            qty: 0,
+            revenue: 0,
+            image: ''
+          };
+
+          // Match image from product catalog
+          const matchedProd = (app.state.products || []).find(p => p.id === item.id || p.name === item.name);
+          if (matchedProd && matchedProd.image) {
+            productStats[key].image = matchedProd.image;
+          }
+        }
+
+        const quantity = Number(item.qty) || 1;
+        const price = Number(item.price) || 0;
+        productStats[key].qty += quantity;
+        productStats[key].revenue += (price * quantity);
+        totalItemsSoldGlobal += quantity;
+      });
+    });
+
+    const sorted = Object.values(productStats).sort((a, b) => b.qty - a.qty).slice(0, 5);
+
+    // 2. Beautiful Animated Empty State (If no sales yet)
+    if (sorted.length === 0) {
+      container.innerHTML = `
+        <div class="empty-leaderboard-box">
+          <div class="animated-burger-icon">
+            <i class="fa-solid fa-burger"></i>
+          </div>
+          <h4 style="font-size:0.92rem; font-weight:800; margin-bottom:4px; color:var(--text-main);">No Orders Punched Yet</h4>
+          <p style="font-size:0.72rem; color:var(--text-muted); max-width:260px; margin-bottom:14px;">
+            Start making sales today to unlock your restaurant's top trending food items!
+          </p>
+          <button class="btn btn-orange" style="width:auto; padding:8px 18px; font-size:0.75rem; border-radius:var(--radius-full);" onclick="app.navigateTo('pos')">
+            <i class="fa-solid fa-plus-circle"></i> Punch First Order
+          </button>
+        </div>
+      `;
+      return;
+    }
+
+    // Top Sold Item for relative percentage scaling
+    const maxQty = sorted[0].qty || 1;
+
+    // 3. Render Top 5 Products Leaderboard
+    container.innerHTML = sorted.map((p, idx) => {
+      const rank = idx + 1;
+      const rankClass = rank === 1 ? 'rank-1' : (rank === 2 ? 'rank-2' : (rank === 3 ? 'rank-3' : 'rank-other'));
+      const medalIcon = rank === 1 ? '<i class="fa-solid fa-crown"></i>' : (rank === 2 ? '2' : (rank === 3 ? '3' : rank));
+      const percentageOfTotal = Math.round((p.qty / maxQty) * 100);
+
+      return `
+        <div class="top-item-card">
+          <div style="display:flex; align-items:center; flex:1; min-width:0;">
+            <div class="rank-badge ${rankClass}">
+              ${medalIcon}
+            </div>
+            <div style="flex:1; min-width:0; padding-right:8px;">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <strong style="font-size:0.86rem; color:var(--text-main); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                  ${p.name}
+                </strong>
+                <span style="font-size:0.72rem; color:var(--text-muted); font-weight:600;">
+                  ${p.qty} Sold
+                </span>
+              </div>
+              <div class="item-meta-bar">
+                <div class="item-meta-fill" style="width: ${percentageOfTotal}%;"></div>
+              </div>
+            </div>
+          </div>
+          <div style="text-align:right; margin-left:8px; flex-shrink:0;">
+            <div style="font-weight:800; font-size:0.88rem; color:var(--accent-green);">
+              Rs. ${p.revenue.toLocaleString()}
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  };
+
+  // Immediate Hook into Dashboard Load
+  const originalRenderDashboard = app.renderDashboard;
+  app.renderDashboard = function() {
+    originalRenderDashboard.call(this);
+    app.renderTopSellingProducts();
+  };
+
+  // Auto-render if on dashboard
+  if (app.currentView === 'dashboard') {
+    app.renderTopSellingProducts();
+  }
+})();
+</script>
+  
+  <!-- ========================================================================
+     ULTRA HIGH-LEVEL iOS TAPTIC ENGINE & HAPTIC FEEDBACK SYSTEM
+     ======================================================================== -->
+
+<script>
+(function() {
+  class AppleHapticEngine {
+    constructor() {
+      this.audioCtx = null;
+      this.initAudioContext();
+    }
+
+    // Audio-Haptic Generator for iOS WebKit & Desktop touch
+    initAudioContext() {
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      if (AudioContextClass) {
+        // Unlocked on first user interaction
+        const unlock = () => {
+          if (!this.audioCtx) {
+            this.audioCtx = new AudioContextClass();
+          }
+          if (this.audioCtx.state === 'suspended') {
+            this.audioCtx.resume();
+          }
+          window.removeEventListener('touchstart', unlock);
+          window.removeEventListener('click', unlock);
+        };
+        window.addEventListener('touchstart', unlock, { passive: true });
+        window.addEventListener('click', unlock, { passive: true });
+      }
+    }
+
+    // iOS Micro-Impulse Click Acoustic transient (Feels like a physical tap)
+    playMicroImpulse(frequency = 55, decay = 0.035, gainVal = 0.12) {
+      if (!this.audioCtx) return;
+      try {
+        const osc = this.audioCtx.createOscillator();
+        const gain = this.audioCtx.createGain();
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(frequency, this.audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(10, this.audioCtx.currentTime + decay);
+
+        gain.gain.setValueAtTime(gainVal, this.audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, this.audioCtx.currentTime + decay);
+
+        osc.connect(gain);
+        gain.connect(this.audioCtx.destination);
+
+        osc.start();
+        osc.stop(this.audioCtx.currentTime + decay);
+      } catch (e) {}
+    }
+
+    // 1. Light Impact (Like iPhone UI selection / chip switch)
+    light() {
+      if (navigator.vibrate) navigator.vibrate(12);
+      this.playMicroImpulse(60, 0.03, 0.15);
+    }
+
+    // 2. Medium Impact (Like adding to cart / plus minus)
+    medium() {
+      if (navigator.vibrate) navigator.vibrate(22);
+      this.playMicroImpulse(48, 0.045, 0.22);
+    }
+
+    // 3. Heavy Impact (Opening checkout modal / main primary action)
+    heavy() {
+      if (navigator.vibrate) navigator.vibrate(35);
+      this.playMicroImpulse(38, 0.06, 0.3);
+    }
+
+    // 4. Success Double Tap (Like Apple Pay / Order Completed: du-duk)
+    success() {
+      if (navigator.vibrate) {
+        navigator.vibrate([15, 60, 25]);
+      }
+      this.playMicroImpulse(50, 0.03, 0.18);
+      setTimeout(() => this.playMicroImpulse(70, 0.04, 0.24), 75);
+    }
+
+    // 5. Warning / Error Alert
+    error() {
+      if (navigator.vibrate) {
+        navigator.vibrate([40, 50, 40]);
+      }
+      this.playMicroImpulse(30, 0.08, 0.35);
+    }
+  }
+
+  // Instantiate Global Haptic Engine
+  window.haptics = new AppleHapticEngine();
+
+  // -------------------------------------------------------------
+  // AUTO-ATTACH HAPTICS TO APP UI ELEMENTS
+  // -------------------------------------------------------------
+  document.addEventListener('pointerdown', function(e) {
+    const target = e.target.closest('button, .product-card, .cat-chip, .btn-quick, .nav-item, .more-item');
+    if (!target) return;
+
+    // A. Specific actions
+    if (target.classList.contains('product-card') || target.classList.contains('btn-add-cart') || target.classList.contains('btn-leaderboard-add')) {
+      window.haptics.medium();
+    } else if (target.classList.contains('btn-orange') || target.classList.contains('floating-cart-bar')) {
+      window.haptics.heavy();
+    } else if (target.classList.contains('btn-red') || target.classList.contains('cart-btn-del')) {
+      window.haptics.error();
+    } else {
+      window.haptics.light();
+    }
+  }, { passive: true });
+
+  // -------------------------------------------------------------
+  // HOOK HAPTICS INTO BUSINESS LOGIC EVENTS
+  // -------------------------------------------------------------
+  
+  // 1. Success on POS Checkout (Apple Pay style du-duk)
+  const prevProcessCheckout = app.processCheckout;
+  app.processCheckout = async function() {
+    await prevProcessCheckout.call(this);
+    window.haptics.success();
+  };
+
+  // 2. Light on Cart Quantity Change
+  const prevChangeCartQty = app.changeCartQty;
+  app.changeCartQty = function(index, delta) {
+    window.haptics.light();
+    prevChangeCartQty.call(this, index, delta);
+  };
+
+  // 3. Medium on Customer Recovery Save
+  const prevSaveRecovery = app.saveRecovery;
+  app.saveRecovery = async function() {
+    await prevSaveRecovery.call(this);
+    window.haptics.success();
+  };
+
+  // 4. Heavy on Day-End Closing
+  const prevSaveDayEndClosing = app.saveDayEndClosing;
+  app.saveDayEndClosing = function() {
+    prevSaveDayEndClosing.call(this);
+    window.haptics.success();
+  };
+
+  // 5. Warning on Trashing / Deleting
+  const prevDeleteExpense = app.deleteExpense;
+  if (prevDeleteExpense) {
+    app.deleteExpense = async function(id) {
+      window.haptics.error();
+      await prevDeleteExpense.call(this, id);
+    };
+  }
+})();
+</script>
+  
+  
+  <!-- ========================================================================
+     ZAYYAM TECH BRANDING & SPONSOR INTEGRATION (SPLASH, BILL, PDF, WHATSAPP)
+     ======================================================================== -->
+
+<style>
+  /* 1. Splash Screen Layout Adjustment (Shifted Upwards) */
+  #app-boot-splash .splash-box {
+    transform: translateY(-24px); /* Logo aur title ko thoda upar shift kiya */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    min-height: 480px;
+  }
+
+  /* 2. Zayyam Tech Cyber Glass Developer Badge */
+  .zayyam-sponsor-box {
+    margin-top: 28px;
+    padding: 10px 16px;
+    background: rgba(16, 23, 40, 0.75);
+    border: 1px solid rgba(59, 130, 246, 0.35); /* Tech Blue Accent */
+    border-radius: 16px;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    text-align: center;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35), 0 0 15px rgba(59, 130, 246, 0.15);
+    animation: sponsorGlow 3s infinite alternate ease-in-out;
+    width: 100%;
+    max-width: 280px;
+  }
+
+  .zayyam-tagline {
+    font-size: 0.62rem;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: #38bdf8; /* Cyber Cyan */
+    margin-bottom: 2px;
+    display: block;
+  }
+
+  .zayyam-company {
+    font-size: 0.95rem;
+    font-weight: 900;
+    color: #ffffff;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+
+  .zayyam-company i {
+    color: #ff6b00;
+    font-size: 0.85rem;
+  }
+
+  .zayyam-contact-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(16, 185, 129, 0.15);
+    border: 1px solid rgba(16, 185, 129, 0.4);
+    padding: 3px 10px;
+    border-radius: 20px;
+    margin-top: 6px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #34d399; /* WhatsApp Green */
+  }
+
+  @keyframes sponsorGlow {
+    0% { border-color: rgba(59, 130, 246, 0.3); box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3); }
+    100% { border-color: rgba(56, 189, 248, 0.7); box-shadow: 0 8px 25px rgba(56, 189, 248, 0.25); }
+  }
+
+  /* Thermal Slip Footer Branding */
+  .tp-footer-branding {
+    border-top: 1px dashed #000000;
+    margin-top: 6px;
+    padding-top: 5px;
+    text-align: center;
+    font-family: 'Courier New', Courier, monospace !important;
+    font-size: 9.5px;
+    line-height: 1.35;
+  }
+</style>
+
+<script>
+(function() {
+  // -------------------------------------------------------------
+  // 1. INJECT SPONSOR BADGE INTO OPENING SPLASH SCREEN
+  // -------------------------------------------------------------
+  function injectSplashSponsor() {
+    const splashBox = document.querySelector('#app-boot-splash .splash-box');
+    if (!splashBox || document.getElementById('zayyam-sponsor-badge')) return;
+
+    const sponsorDiv = document.createElement('div');
+    sponsorDiv.className = 'zayyam-sponsor-box';
+    sponsorDiv.id = 'zayyam-sponsor-badge';
+    sponsorDiv.innerHTML = `
+      <span class="zayyam-tagline">Custom App Development</span>
+      <div class="zayyam-company">
+        <i class="fa-solid fa-code"></i> Zayyam Tech
+      </div>
+      <div class="zayyam-contact-badge">
+        <i class="fa-brands fa-whatsapp"></i> Contact: 0329-2382812
+      </div>
+    `;
+
+    splashBox.appendChild(sponsorDiv);
+  }
+
+  // Run immediately for splash
+  injectSplashSponsor();
+  document.addEventListener('DOMContentLoaded', injectSplashSponsor);
+
+  // -------------------------------------------------------------
+  // 2. UPDATE THERMAL BILL & PDF INVOICE FOOTER WITH ZAYYAM TECH
+  // -------------------------------------------------------------
+  const originalShowInvoiceSlip = app.showInvoiceSlip;
+  app.showInvoiceSlip = function(sale, items) {
+    // Call base invoice renderer
+    originalShowInvoiceSlip.call(this, sale, items);
+
+    // Update receipt footer with Zayyam Tech
+    const receipt = document.getElementById('actual-sale-receipt');
+    if (receipt) {
+      // Remove old generic footer if exists
+      const oldFooters = receipt.querySelectorAll('.tp-center');
+      if (oldFooters.length > 0) {
+        const lastFooter = oldFooters[oldFooters.length - 1];
+        lastFooter.innerHTML = `
+          Thank you for dining with us!
+          <div class="tp-footer-branding">
+            <strong>Software: Zayyam Tech</strong><br>
+            If You Make Contact: 03292382812
+          </div>
+        `;
+      }
+    }
+  };
+
+  // -------------------------------------------------------------
+  // 3. UPDATE WHATSAPP SHARE MESSAGE WITH ZAYYAM TECH FOOTER
+  // -------------------------------------------------------------
+  const originalShareWhatsApp = app.shareCurrentSaleWhatsApp;
+  app.shareCurrentSaleWhatsApp = function() {
+    const sale = this.state.currentInvoiceData;
+    if (!sale) return;
+
+    const profile = app.getShopProfile();
+    const tokenNum = sale.tokenNumber || (sale.invoiceNo || '').slice(-3) || '1';
+
+    let msg = `*--- ${profile.name.toUpperCase()} ---*\n`;
+    msg += `*Order Receipt (TOKEN #${tokenNum})*\n`;
+    if (profile.phone) msg += `Tel: ${profile.phone}\n`;
+    msg += `Invoice #: *#${sale.invoiceNo}*\n`;
+    msg += `Date: ${new Date(sale.timestamp || sale.date).toLocaleDateString()}\n`;
+    msg += `Customer: *${sale.customerName || 'Walk-in'}*\n`;
+    msg += `----------------------------\n`;
+    (sale.items || []).forEach(i => {
+      msg += `• ${i.name} (x${i.qty}) = Rs. ${i.price * i.qty}\n`;
+    });
+    msg += `----------------------------\n`;
+    if (sale.discount > 0) msg += `Discount: - Rs. ${sale.discount}\n`;
+    msg += `*TOTAL AMOUNT: Rs. ${sale.grandTotal}*\n`;
+    msg += `Payment: ${sale.paymentMethod.toUpperCase()}\n\n`;
+    msg += `Thank you for choosing ${profile.name}!\n`;
+    msg += `----------------------------\n`;
+    msg += `*Software: Zayyam Tech*\n`;
+    msg += `*If You Make Contact: 03292382812*`;
+
+    let phone = '';
+    if (sale.customerId && sale.customerId !== 'walkin') {
+      const c = this.state.customers.find(item => item.id === sale.customerId);
+      if (c && c.phone) phone = c.phone.replace(/[^0-9]/g, '');
+    }
+
+    if (phone.startsWith('03')) phone = '92' + phone.slice(1);
+    const url = phone.length >= 10 
+      ? `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`
+      : `https://wa.me/?text=${encodeURIComponent(msg)}`;
+    
+    window.open(url, '_blank');
+  };
+})();
+</script>
+  
 </body>
 </html>
