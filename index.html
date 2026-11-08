@@ -10554,5 +10554,1686 @@ ATA -->
   restorePermanentDriveState();
 })();
 </script>
+  
+  <!-- ========================================================================
+     5-DAY FULL-ACCESS VIP TRIAL ENGINE (CLEAN TOPBAR + SETTINGS ONLY BADGE)
+     ======================================================================== -->
+
+<script>
+(function() {
+  class ZayyamFiveDayTrialEngine {
+    constructor() {
+      this.TRIAL_DAYS = 5;
+      this.TRIAL_MS = this.TRIAL_DAYS * 24 * 60 * 60 * 1000;
+      this.initTrial();
+    }
+
+    initTrial() {
+      // 1. First Installation Timestamp
+      let installTime = localStorage.getItem('zayyam_install_time_v5');
+      if (!installTime) {
+        installTime = Date.now();
+        localStorage.setItem('zayyam_install_time_v5', installTime);
+      }
+
+      const timePassed = Date.now() - Number(installTime);
+      this.isTrialActive = timePassed < this.TRIAL_MS;
+      this.daysRemaining = Math.max(0, Math.ceil((this.TRIAL_MS - timePassed) / (24 * 60 * 60 * 1000)));
+
+      // 2. Grant 100% PRO Access during the 5 days
+      if (this.isTrialActive && !localStorage.getItem('zayyam_pos_tier')) {
+        // Unlock all features during trial
+        window.zayyamLicense.isProPlan = function() {
+          return true; // Unlocks Cash in hand, Galla, Cloud, WhatsApp, Reports
+        };
+      } else if (!this.isTrialActive && localStorage.getItem('zayyam_pos_tier') !== 'PRO') {
+        // Re-lock after 5 days
+        window.zayyamLicense.isProPlan = function() {
+          return false;
+        };
+      }
+
+      this.injectSettingsCard();
+    }
+
+    // Inject VIP Trial Status Card ONLY inside Settings Tab (Clean Topbar)
+    injectSettingsCard() {
+      const self = this;
+      function renderCard() {
+        const settingsView = document.getElementById('view-settings');
+        if (!settingsView || document.getElementById('card-zayyam-5day-trial')) return;
+
+        const isPurchasedPro = localStorage.getItem('zayyam_pos_tier') === 'PRO';
+        const card = document.createElement('div');
+        card.className = 'app-card';
+        card.id = 'card-zayyam-5day-trial';
+
+        if (isPurchasedPro) {
+          card.style.cssText = "background: linear-gradient(135deg, rgba(16,185,129,0.15), rgba(16,23,40,0.9)); border: 1px solid var(--accent-green); padding: 14px; margin-bottom: 12px;";
+          card.innerHTML = `
+            <div class="card-header" style="margin-bottom:6px;">
+              <span class="card-title" style="color:var(--accent-green);">
+                <i class="fa-solid fa-circle-check"></i> Permanent PRO Business License
+              </span>
+              <span class="badge-tag cash">Active</span>
+            </div>
+            <p style="font-size:0.75rem; color:var(--text-muted); margin:0;">
+              Aapka lifetime/monthly PRO license mukammal activate hai. Tamam features unlocked hain.
+            </p>
+          `;
+        } else if (self.isTrialActive) {
+          card.style.cssText = "background: linear-gradient(135deg, rgba(245,158,11,0.15), rgba(16,23,40,0.9)); border: 1.5px solid var(--accent-amber); padding: 14px; margin-bottom: 12px;";
+          card.innerHTML = `
+            <div class="card-header" style="margin-bottom:6px;">
+              <span class="card-title" style="color:var(--accent-amber);">
+                <i class="fa-solid fa-crown"></i> 5-Day VIP Free Trial Active
+              </span>
+              <span class="badge-tag" style="background:#f59e0b; color:#fff; font-weight:800;">
+                ${self.daysRemaining} Days Left
+              </span>
+            </div>
+            <p style="font-size:0.75rem; color:var(--text-muted); margin-bottom:10px;">
+              Mubarak Ho! Pehle 5 din ke liye tamaam PRO features (Cash in Hand, Galla Audit, WhatsApp Share, Cloud Sync) bilkul <strong>FREE</strong> unlock hain.
+            </p>
+            <button class="btn btn-orange" style="padding:10px; font-size:0.85rem;" onclick="app.openModal('modal-pro-upgrade')">
+              <i class="fa-solid fa-bolt"></i> Upgrade to Permanent PRO License
+            </button>
+          `;
+        } else {
+          // Trial Expired
+          card.style.cssText = "background: linear-gradient(135deg, rgba(239,68,68,0.15), rgba(16,23,40,0.9)); border: 1.5px solid var(--accent-red); padding: 14px; margin-bottom: 12px;";
+          card.innerHTML = `
+            <div class="card-header" style="margin-bottom:6px;">
+              <span class="card-title" style="color:var(--accent-red);">
+                <i class="fa-solid fa-triangle-exclamation"></i> 5-Day VIP Trial Expired
+              </span>
+              <span class="badge-tag red">Expired</span>
+            </div>
+            <p style="font-size:0.75rem; color:var(--text-muted); margin-bottom:10px;">
+              Aapka 5 din ka free trial khatam ho chuka hai. Cash in Hand, Galla Audit aur Cloud Sync dubara shuru karne ke liye PRO activate karein.
+            </p>
+            <button class="btn btn-orange" style="padding:10px; font-size:0.85rem;" onclick="app.openModal('modal-pro-upgrade')">
+              <i class="fa-solid fa-crown"></i> Activate PRO (Rs. 1,499 / Month)
+            </button>
+          `;
+        }
+
+        settingsView.insertBefore(card, settingsView.firstChild);
+      }
+
+      document.addEventListener('DOMContentLoaded', renderCard);
+      renderCard();
+    }
+  }
+
+  // Remove any top-bar trial badge if previously attached
+  const oldTopBadge = document.getElementById('badge-trial-counter');
+  if (oldTopBadge) oldTopBadge.remove();
+
+  // Initialize
+  window.fiveDayTrial = new ZayyamFiveDayTrialEngine();
+})();
+</script>
+  <!-- ========================================================================
+       EXTENSION: SECURE RAW MATERIAL DELETE & PROTECTED CUSTOMER EDIT (ADMIN PIN)
+       (Paste this code right before </body>)
+       ======================================================================== -->
+
+  <style>
+    /* Styling for Raw Material action button group */
+    .ingr-action-btns {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 4px;
+      justify-content: flex-end;
+    }
+    .ingr-action-btns .badge-tag {
+      padding: 5px 9px;
+      cursor: pointer;
+      border: none;
+      border-radius: var(--radius-sm);
+      transition: transform 0.15s ease;
+    }
+    .ingr-action-btns .badge-tag:active {
+      transform: scale(0.92);
+    }
+  </style>
+
+  <script>
+    (function() {
+      // ====================================================================
+      // 1. RAW MATERIAL STOCK ITEM DELETION (WITH ADMIN AUTH & INTEGRITY CHECK)
+      // ====================================================================
+
+      // A. Upgraded Stock List Renderer with Edit AND Delete Buttons
+      app.renderInventory = function() {
+        const container = document.getElementById('inventory-items-list');
+        const countLabel = document.getElementById('stock-count-label');
+        if (countLabel) countLabel.innerText = `${this.state.ingredients.length} Items`;
+
+        if (!container) return;
+
+        if (this.state.ingredients.length === 0) {
+          container.innerHTML = `<p style="text-align:center; padding:18px; color:var(--text-dim); font-size:0.8rem;">Koi raw material stock mojood nahi hai. "Add Raw Item" par tap karein.</p>`;
+          return;
+        }
+
+        container.innerHTML = this.state.ingredients.map(ing => {
+          const isLow = ing.stock <= ing.minStock;
+          const displayStock = (ing.unit === 'kg' || ing.unit === 'g') 
+            ? `${ing.stock} g (${(ing.stock / 1000).toFixed(2)} kg)`
+            : (ing.unit === 'L' || ing.unit === 'ml')
+              ? `${ing.stock} ml (${(ing.stock / 1000).toFixed(2)} L)`
+              : `${ing.stock} ${ing.unit}`;
+
+          return `
+            <div class="ledger-row" style="align-items: center;">
+              <div class="ledger-main">
+                <h4>${ing.name}</h4>
+                <p>Avg Cost: Rs. ${ing.purchaseRate} / ${ing.unit} • Alert Min: ${ing.minStock}</p>
+              </div>
+              <div class="ledger-side">
+                <div class="ledger-amount" style="color: ${isLow ? 'var(--accent-red)' : 'var(--accent-green)'};">
+                  ${displayStock}
+                </div>
+                <div class="ingr-action-btns">
+                  <!-- Edit Raw Ingredient (Protected) -->
+                  <button class="badge-tag" style="background:var(--bg-surface-elevated); color:var(--text-main);" title="Edit Item" onclick="app.requestAdminAuth(() => app.editIngredient('${ing.id}'))">
+                    <i class="fa-solid fa-pen"></i>
+                  </button>
+                  <!-- Delete Raw Ingredient (Protected with Admin PIN) -->
+                  <button class="badge-tag red" title="Delete Raw Item" onclick="app.deleteIngredientSecure('${ing.id}')">
+                    <i class="fa-solid fa-trash-can"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      };
+
+      // B. Secure Ingredient Deletion Method
+      app.deleteIngredientSecure = function(id) {
+        const ing = this.state.ingredients.find(i => i.id === id);
+        if (!ing) return;
+
+        // Check if any recipe is using this raw item
+        const linkedRecipes = [];
+        for (const prodId in (this.state.recipes || {})) {
+          const rec = this.state.recipes[prodId];
+          if (rec && rec.lines) {
+            const isUsed = rec.lines.some(line => line.ingredientId === id);
+            if (isUsed) {
+              const prod = this.state.products.find(p => p.id === prodId);
+              linkedRecipes.push(prod ? prod.name : prodId);
+            }
+          }
+        }
+
+        // Require Admin PIN / Password Authentication
+        this.requestAdminAuth(async () => {
+          let warningMsg = `Kya aap waqai raw item "${ing.name}" ko mukammal delete karna chahte hain?`;
+          if (linkedRecipes.length > 0) {
+            warningMsg = `⚠️ ALERT: Yeh item (${linkedRecipes.join(', ')}) ki Recipe mein istemal ho raha hai!\n\nDelete karne se recipes par asar par sakta hai. Kya aap phir bhi delete karna chahte hain?`;
+          }
+
+          if (!confirm(warningMsg)) return;
+
+          // 1. Delete from IndexedDB
+          await this.dbDelete('ingredients', id);
+
+          // 2. Remove from active state memory
+          this.state.ingredients = this.state.ingredients.filter(i => i.id !== id);
+
+          // 3. Clean up recipes linking this item
+          for (const prodId in this.state.recipes) {
+            const rec = this.state.recipes[prodId];
+            if (rec && rec.lines) {
+              rec.lines = rec.lines.filter(l => l.ingredientId !== id);
+              await this.dbPut('recipes', rec);
+            }
+          }
+
+          // 4. Update UI screens
+          this.renderInventory();
+          if (typeof this.renderRecipes === 'function') this.renderRecipes();
+          this.renderDashboard();
+
+          alert(`Raw material "${ing.name}" kamyabi se delete ho chuka hai.`);
+        });
+      };
+
+      // ====================================================================
+      // 2. PROTECTED CUSTOMER KHATA EDIT (ADMIN AUTH REQUIRED)
+      // ====================================================================
+
+      // A. Wrap original editCustomer in Admin PIN Verification
+      const originalEditCustomer = app.editCustomer;
+      app.editCustomer = function(id) {
+        this.requestAdminAuth(() => {
+          originalEditCustomer.call(this, id);
+        });
+      };
+
+      // B. Override Customer List Renderer to make sure buttons invoke protected flow
+      const baseRenderCustomers = app.renderCustomers;
+      app.renderCustomers = function() {
+        baseRenderCustomers.call(this);
+
+        // Ensure all edit buttons on screen are securely wired
+        const editButtons = document.querySelectorAll('#customers-list button[onclick*="editCustomer"]');
+        editButtons.forEach(btn => {
+          const onclickAttr = btn.getAttribute('onclick');
+          if (onclickAttr && !onclickAttr.includes('requestAdminAuth')) {
+            const match = onclickAttr.match(/editCustomer\('([^']+)'\)/);
+            if (match && match[1]) {
+              btn.setAttribute('onclick', `app.requestAdminAuth(() => app.editCustomer('${match[1]}'))`);
+            }
+          }
+        });
+      };
+
+      // Immediate refresh of views if currently open
+      if (app.currentView === 'inventory') {
+        app.renderInventory();
+      }
+      if (app.currentView === 'customers') {
+        app.renderCustomers();
+      }
+    })();
+  </script>
+  
+  <!-- ========================================================================
+       EXTENSION: ITEM VARIATIONS / ADD-ONS (MODIFIERS) & STAFF DEMO ENGINE
+       (Paste this code right before </body>)
+       ======================================================================== -->
+
+  <!-- Modal 1: POS Item Variation / Add-ons Selector Pop-up -->
+  <div class="modal-overlay" id="modal-item-variations" style="z-index: 999999;">
+    <div class="modal-sheet" style="max-width: 440px;">
+      <div class="modal-header">
+        <div>
+          <h3 id="var-modal-item-name" style="font-size: 1.05rem; font-weight:800; margin:0;">Select Add-ons</h3>
+          <span style="font-size: 0.72rem; color: var(--text-muted);">Customize burger / meal variations</span>
+        </div>
+        <button class="btn-close-modal" onclick="app.closeModal('modal-item-variations')"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <div class="modal-body" style="padding: 16px;">
+        <input type="hidden" id="var-target-prod-id">
+        
+        <div style="display:flex; justify-content:space-between; align-items:center; background:var(--bg-surface-elevated); padding:10px 14px; border-radius:var(--radius-md); margin-bottom:12px;">
+          <span style="font-size:0.85rem; font-weight:700;">Base Price:</span>
+          <strong id="var-modal-base-price" style="font-size:1.05rem; color:var(--primary-accent);">Rs. 0</strong>
+        </div>
+
+        <label class="form-label" style="font-size:0.75rem; margin-bottom:8px;">Available Add-ons & Extra Toppings:</label>
+        <div id="var-addons-options-list" style="display:flex; flex-direction:column; gap:8px;"></div>
+      </div>
+
+      <div class="modal-footer" style="display:flex; justify-content:space-between; align-items:center;">
+        <div>
+          <span style="font-size:0.7rem; color:var(--text-muted); display:block;">Total Item Price:</span>
+          <strong id="var-modal-total-calc" style="font-size:1.15rem; color:var(--accent-green);">Rs. 0</strong>
+        </div>
+        <button class="btn btn-orange" style="width:auto; padding:10px 24px;" onclick="app.confirmVariationAddToCart()">
+          <i class="fa-solid fa-check"></i> Add to Order
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 2: Staff Management Coming Soon Modal -->
+  <div class="modal-overlay" id="modal-staff-comingsoon" style="z-index: 9999999;">
+    <div class="modal-sheet" style="max-width: 380px; text-align: center; padding: 24px 20px;">
+      <div style="width: 64px; height: 64px; border-radius: 20px; background: rgba(59, 130, 246, 0.15); color: var(--accent-blue); display: grid; place-items: center; font-size: 2rem; margin: 0 auto 14px;">
+        <i class="fa-solid fa-user-shield"></i>
+      </div>
+      <h3 style="font-size: 1.15rem; font-weight: 800; margin-bottom: 6px; color: var(--text-main);">Staff Roles & Permissions</h3>
+      <span class="badge-tag credit" style="margin-bottom: 12px; font-size: 0.72rem; padding: 4px 12px;">COMING SOON</span>
+      
+      <p style="font-size: 0.78rem; color: var(--text-muted); line-height: 1.45; margin-bottom: 18px;">
+        Cashier vs Manager multi-user security permissions, shift handover system aur staff sales commission engine agle update mein dastyab hoga!
+      </p>
+
+      <button class="btn btn-outline" style="border-color: var(--accent-blue); color: var(--accent-blue);" onclick="app.closeModal('modal-staff-comingsoon')">
+        Theek Hai (Close)
+      </button>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      // ----------------------------------------------------------------------
+      // 1. INJECT ADD-ONS CONFIGURATION BUILDER INTO PRODUCT EDIT MODAL
+      // ----------------------------------------------------------------------
+      function injectProductAddonsBuilderUI() {
+        const prodModalBody = document.querySelector('#modal-product .modal-body');
+        if (!prodModalBody || document.getElementById('prod-addons-config-card')) return;
+
+        const addonsHtml = `
+          <div class="app-card" id="prod-addons-config-card" style="background:var(--bg-surface-elevated); padding:12px; margin: 12px 0; border:1px solid var(--border-subtle);">
+            <div class="card-header" style="margin-bottom:6px;">
+              <span class="card-title" style="font-size:0.85rem;">
+                <i class="fa-solid fa-layer-group" style="color:var(--accent-amber);"></i> Item Variations & Add-ons (Shami, Eggs, Cheese)
+              </span>
+              <button type="button" class="btn-quick" style="padding:4px 8px; font-size:0.7rem;" onclick="app.addProductAddonRow()">
+                <i class="fa-solid fa-plus"></i> Add-on Dalein
+              </button>
+            </div>
+            <p style="font-size:0.7rem; color:var(--text-muted); margin-bottom:10px;">
+              Double Shami, Extra Egg waghera add karein. Yeh sale hone par seedha raw stock se deduct hongay.
+            </p>
+            <div id="product-addons-editor-list"></div>
+          </div>
+        `;
+
+        const minStockRow = prodModalBody.querySelectorAll('.form-row');
+        if (minStockRow && minStockRow.length > 0) {
+          minStockRow[minStockRow.length - 1].insertAdjacentHTML('afterend', addonsHtml);
+        } else {
+          prodModalBody.insertAdjacentHTML('beforeend', addonsHtml);
+        }
+      }
+
+      // Add-on row generator inside Product Modal
+      app.addProductAddonRow = function(name = '', price = 30, ingId = '', deductQty = 1) {
+        const container = document.getElementById('product-addons-editor-list');
+        if (!container) return;
+
+        const row = document.createElement('div');
+        row.className = 'prod-addon-row';
+        row.style.cssText = 'background:var(--bg-surface); border:1px solid var(--border-subtle); border-radius:var(--radius-sm); padding:8px; margin-bottom:6px; display:grid; grid-template-columns: 2fr 1fr 2fr 1fr 30px; gap:6px; align-items:center;';
+
+        const ingOpts = `<option value="">-- No Raw Stock Link --</option>` + 
+          (app.state.ingredients || []).map(i => `<option value="${i.id}" ${i.id === ingId ? 'selected' : ''}>${i.name} (${i.unit})</option>`).join('');
+
+        row.innerHTML = `
+          <input type="text" class="form-control addon-name-inp" placeholder="e.g. Double Shami, Egg" value="${name}" style="font-size:0.78rem; padding:6px 8px;">
+          <input type="number" class="form-control addon-price-inp" placeholder="+Rs" value="${price}" style="font-size:0.78rem; padding:6px 8px;" title="Extra Customer Price">
+          <select class="form-control addon-ing-sel" style="font-size:0.75rem; padding:6px 8px;">${ingOpts}</select>
+          <input type="number" class="form-control addon-qty-inp" placeholder="Deduct" value="${deductQty}" style="font-size:0.78rem; padding:6px 8px;" title="Quantity to deduct from Raw Stock">
+          <button type="button" class="btn-close-modal" style="height:32px; width:28px;" onclick="this.parentElement.remove()"><i class="fa-solid fa-xmark"></i></button>
+        `;
+
+        container.appendChild(row);
+      };
+
+      // ----------------------------------------------------------------------
+      // 2. OVERRIDE PRODUCT ADD / EDIT TO SUPPORT EDITABLE ADD-ONS
+      // ----------------------------------------------------------------------
+      const baseOpenAddProd = app.openAddProductModal;
+      app.openAddProductModal = function() {
+        injectProductAddonsBuilderUI();
+        baseOpenAddProd.call(this);
+        const container = document.getElementById('product-addons-editor-list');
+        if (container) container.innerHTML = '';
+      };
+
+      const baseEditProd = app.editProduct;
+      app.editProduct = function(id) {
+        injectProductAddonsBuilderUI();
+        baseEditProd.call(this, id);
+        const p = this.state.products.find(item => item.id === id);
+        const container = document.getElementById('product-addons-editor-list');
+        if (container) {
+          container.innerHTML = '';
+          if (p && p.addons && Array.isArray(p.addons)) {
+            p.addons.forEach(a => {
+              app.addProductAddonRow(a.name, a.price, a.ingredientId, a.deductQty);
+            });
+          }
+        }
+      };
+
+      // Override saveProduct to capture Add-ons
+      const baseSaveProduct = app.saveProduct;
+      app.saveProduct = async function() {
+        const id = document.getElementById('prod-id').value || ('prod_' + Date.now());
+        const addonRows = document.querySelectorAll('.prod-addon-row');
+        const addonsList = [];
+
+        addonRows.forEach(r => {
+          const name = r.querySelector('.addon-name-inp')?.value.trim();
+          const price = parseFloat(r.querySelector('.addon-price-inp')?.value) || 0;
+          const ingredientId = r.querySelector('.addon-ing-sel')?.value || '';
+          const deductQty = parseFloat(r.querySelector('.addon-qty-inp')?.value) || 1;
+
+          if (name) {
+            addonsList.push({
+              id: 'add_' + Math.random().toString(36).substr(2, 6),
+              name,
+              price,
+              ingredientId,
+              deductQty
+            });
+          }
+        });
+
+        // Call original product saver
+        await baseSaveProduct.call(this);
+
+        // Update product object with addons in state and DB
+        const prod = this.state.products.find(p => p.id === id);
+        if (prod) {
+          prod.addons = addonsList;
+          await this.dbPut('products', prod);
+        }
+      };
+
+      // ----------------------------------------------------------------------
+      // 3. POS INTERACTION: SHOW ADD-ONS POPUP OR DIRECT CART ADD
+      // ----------------------------------------------------------------------
+      app.activeVariationProduct = null;
+
+      app.addToCart = function(productId) {
+        const prod = this.state.products.find(p => p.id === productId);
+        if (!prod) return;
+
+        if (prod.stock <= 0) {
+          alert(`OUT OF STOCK: "${prod.name}" ka stock khatam hai.`);
+          return;
+        }
+
+        // Agar is product mein variations / add-ons hain to dialog open karein
+        if (prod.addons && prod.addons.length > 0) {
+          app.openVariationsModal(prod);
+        } else {
+          // Direct add if no addons
+          app.pushItemToCartDirect(prod, []);
+        }
+      };
+
+      app.openVariationsModal = function(product) {
+        this.activeVariationProduct = product;
+        document.getElementById('var-target-prod-id').value = product.id;
+        document.getElementById('var-modal-item-name').innerText = product.name;
+        document.getElementById('var-modal-base-price').innerText = `Rs. ${product.price}`;
+
+        const container = document.getElementById('var-addons-options-list');
+        container.innerHTML = product.addons.map((a, idx) => `
+          <div style="display:flex; justify-content:space-between; align-items:center; background:var(--bg-surface); border:1px solid var(--border-subtle); border-radius:var(--radius-md); padding:10px 12px;">
+            <label style="display:flex; align-items:center; gap:10px; cursor:pointer; flex:1;">
+              <input type="checkbox" class="var-addon-chk" data-idx="${idx}" onchange="app.recalcVariationTotal()" style="width:18px; height:18px; accent-color:var(--primary-accent);">
+              <span style="font-size:0.86rem; font-weight:700;">${a.name}</span>
+            </label>
+            <span style="font-size:0.85rem; font-weight:800; color:var(--primary-accent);">+ Rs. ${a.price}</span>
+          </div>
+        `).join('');
+
+        this.recalcVariationTotal();
+        this.openModal('modal-item-variations');
+      };
+
+      app.recalcVariationTotal = function() {
+        const prod = this.activeVariationProduct;
+        if (!prod) return;
+
+        let total = prod.price;
+        const checkboxes = document.querySelectorAll('.var-addon-chk:checked');
+        checkboxes.forEach(chk => {
+          const idx = parseInt(chk.dataset.idx);
+          if (prod.addons[idx]) {
+            total += (prod.addons[idx].price || 0);
+          }
+        });
+
+        document.getElementById('var-modal-total-calc').innerText = `Rs. ${total.toLocaleString()}`;
+      };
+
+      app.confirmVariationAddToCart = function() {
+        const prod = this.activeVariationProduct;
+        if (!prod) return;
+
+        const selectedAddons = [];
+        const checkboxes = document.querySelectorAll('.var-addon-chk:checked');
+        checkboxes.forEach(chk => {
+          const idx = parseInt(chk.dataset.idx);
+          if (prod.addons[idx]) {
+            selectedAddons.push(prod.addons[idx]);
+          }
+        });
+
+        app.pushItemToCartDirect(prod, selectedAddons);
+        this.closeModal('modal-item-variations');
+      };
+
+      app.pushItemToCartDirect = function(prod, addons = []) {
+        const extraCost = addons.reduce((sum, a) => sum + (a.price || 0), 0);
+        const finalPrice = prod.price + extraCost;
+        const addonTitle = addons.length > 0 ? ` (${addons.map(a => a.name).join(', ')})` : '';
+        const cartItemKey = prod.id + (addons.length > 0 ? '_' + addons.map(a => a.id).sort().join('_') : '');
+
+        const existing = this.state.cart.find(i => i.cartKey === cartItemKey);
+        if (existing) {
+          if (existing.qty + 1 > prod.stock) {
+            alert(`Stock limit reached for "${prod.name}".`);
+            return;
+          }
+          existing.qty++;
+        } else {
+          this.state.cart.push({
+            cartKey: cartItemKey,
+            id: prod.id,
+            name: prod.name + addonTitle,
+            baseName: prod.name,
+            price: finalPrice,
+            qty: 1,
+            selectedAddons: addons
+          });
+        }
+
+        this.updateFloatingCartBar();
+      };
+
+      // ----------------------------------------------------------------------
+      // 4. CHECKOUT INVENTORY DEDUCTION (DOUBLE SHAMI / 2 EGGS AUTO DEDUCT)
+      // ----------------------------------------------------------------------
+      const baseProcessCheckout = app.processCheckout;
+      app.processCheckout = async function() {
+        if (this.state.cart.length === 0) return;
+
+        // Deduct specific add-ons from raw material stock
+        for (const item of this.state.cart) {
+          if (item.selectedAddons && item.selectedAddons.length > 0) {
+            for (const addon of item.selectedAddons) {
+              if (addon.ingredientId) {
+                const ing = this.state.ingredients.find(i => i.id === addon.ingredientId);
+                if (ing) {
+                  // e.g. 2 eggs * item quantity = 2 eggs deducted
+                  const totalDeduct = (addon.deductQty || 1) * item.qty;
+                  ing.stock = Math.max(0, ing.stock - totalDeduct);
+                  await this.dbPut('ingredients', ing);
+                }
+              }
+            }
+          }
+        }
+
+        // Proceed with normal checkout flow
+        await baseProcessCheckout.call(this);
+      };
+
+      // ----------------------------------------------------------------------
+      // 5. STAFF ROLES DEMO BUTTON (INJECT IN MORE VIEW & DASHBOARD)
+      // ----------------------------------------------------------------------
+      function injectStaffDemoButtons() {
+        // A. Inject into "More" Hub
+        const moreGrid = document.querySelector('#view-more .more-grid');
+        if (moreGrid && !document.getElementById('btn-more-staff-demo')) {
+          const item = document.createElement('div');
+          item.id = 'btn-more-staff-demo';
+          item.className = 'more-item';
+          item.onclick = () => app.openModal('modal-staff-comingsoon');
+          item.innerHTML = `
+            <div class="more-item-icon" style="background:#2563eb;"><i class="fa-solid fa-user-shield"></i></div>
+            <div class="more-item-title">Staff Roles <span class="badge-tag red" style="font-size:0.55rem; padding:1px 4px;">Demo</span></div>
+          `;
+          moreGrid.appendChild(item);
+        }
+
+        // B. Inject into Dashboard Quick Bar
+        const dashQuick = document.querySelector('#view-dashboard .quick-actions');
+        if (dashQuick && !document.getElementById('btn-dash-staff-demo')) {
+          const btn = document.createElement('button');
+          btn.id = 'btn-dash-staff-demo';
+          btn.className = 'btn-quick';
+          btn.onclick = () => app.openModal('modal-staff-comingsoon');
+          btn.innerHTML = `<i class="fa-solid fa-user-shield" style="color:var(--accent-blue);"></i> Staff Roles`;
+          dashQuick.appendChild(btn);
+        }
+      }
+
+      document.addEventListener('DOMContentLoaded', () => {
+        injectProductAddonsBuilderUI();
+        injectStaffDemoButtons();
+      });
+      injectProductAddonsBuilderUI();
+      injectStaffDemoButtons();
+    })();
+  </script>
+  <!-- ========================================================================
+       EXTENSION: SILENT 5-DAY TRIAL (NO SETTINGS BANNER) & AUTO-LOCK AFTER EXPIRY
+       (Paste this code right before </body>)
+       ======================================================================== -->
+
+  <script>
+    (function() {
+      // ----------------------------------------------------------------------
+      // 1. PERMANENTLY REMOVE 5-DAY TRIAL CARD FROM SETTINGS
+      // ----------------------------------------------------------------------
+      function removeTrialCardFromSettings() {
+        // Purana trial card agar DOM mein add hua ho to delete karein
+        const trialCard = document.getElementById('card-zayyam-5day-trial');
+        if (trialCard) trialCard.remove();
+
+        const badgeTrial = document.getElementById('badge-trial-counter');
+        if (badgeTrial) badgeTrial.remove();
+      }
+
+      // ----------------------------------------------------------------------
+      // 2. SILENT 5-DAY ENGINE & POST-EXPIRY HARD LOCK
+      // ----------------------------------------------------------------------
+      class SilentFiveDayTrialManager {
+        constructor() {
+          this.TRIAL_DAYS = 5;
+          this.TRIAL_MS = this.TRIAL_DAYS * 24 * 60 * 60 * 1000;
+          this.checkAndApplyLockState();
+        }
+
+        checkAndApplyLockState() {
+          // Installation timestamp track karein
+          let installTime = localStorage.getItem('zayyam_install_time_v5');
+          if (!installTime) {
+            installTime = Date.now();
+            localStorage.setItem('zayyam_install_time_v5', installTime);
+          }
+
+          const timePassed = Date.now() - Number(installTime);
+          const isTrialActive = timePassed < this.TRIAL_MS;
+          const isPurchasedPro = localStorage.getItem('zayyam_pos_tier') === 'PRO';
+
+          if (isPurchasedPro) {
+            // Agar user ne PRO khareed liya hai to permanent unlocked
+            window.zayyamLicense.isProPlan = function() {
+              return true;
+            };
+          } else if (isTrialActive) {
+            // Pehle 5 din: 100% Khamosh (Silent) Full Access - No popup, No Banner
+            window.zayyamLicense.isProPlan = function() {
+              return true;
+            };
+          } else {
+            // 5 Din Ke Baad: Automatic Hard Lock active
+            window.zayyamLicense.isProPlan = function() {
+              return false; // Sabhi features par lock lag gaya
+            };
+          }
+
+          // Clean settings whenever loaded
+          removeTrialCardFromSettings();
+        }
+      }
+
+      // Initialize
+      window.silentTrialManager = new SilentFiveDayTrialManager();
+
+      // Hook into DOM updates so trial card never appears in Settings
+      document.addEventListener('DOMContentLoaded', () => {
+        removeTrialCardFromSettings();
+        window.silentTrialManager.checkAndApplyLockState();
+      });
+
+      const origNavigate = app.navigateTo;
+      app.navigateTo = function(viewId, pushHistory = true) {
+        origNavigate.call(this, viewId, pushHistory);
+        if (viewId === 'settings') {
+          removeTrialCardFromSettings();
+        }
+      };
+
+      removeTrialCardFromSettings();
+    })();
+  </script>
+  <!-- ========================================================================
+       ZAYYAM TECH INTERACTIVE PLAN SWITCHER (RS. 50 vs RS. 70) + RS. 2100 QR
+       (Paste this code right before </body>)
+       ======================================================================== -->
+
+  <style>
+    /* Interactive Plan Selector Cards */
+    .plans-tab-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .plan-interactive-card {
+      background: var(--bg-surface-elevated);
+      border: 2px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 12px 10px;
+      text-align: center;
+      cursor: pointer;
+      position: relative;
+      transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+      user-select: none;
+    }
+
+    .plan-interactive-card:active {
+      transform: scale(0.96);
+    }
+
+    /* Active Selected State */
+    .plan-interactive-card.selected {
+      border-color: var(--primary-accent);
+      background: linear-gradient(145deg, rgba(255, 107, 0, 0.16), rgba(16, 23, 40, 0.95));
+      box-shadow: 0 6px 20px rgba(255, 107, 0, 0.3);
+    }
+
+    .plan-interactive-card.selected::after {
+      content: '\f00c';
+      font-family: 'Font Awesome 6 Free';
+      font-weight: 900;
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      width: 22px;
+      height: 22px;
+      background: var(--primary-accent);
+      color: #fff;
+      border-radius: 50%;
+      font-size: 0.65rem;
+      display: grid;
+      place-items: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+    }
+
+    .plan-badge-daily {
+      font-size: 0.65rem;
+      font-weight: 800;
+      padding: 2px 8px;
+      border-radius: var(--radius-full);
+      display: inline-block;
+      margin-bottom: 4px;
+    }
+
+    .plan-badge-daily.basic {
+      background: rgba(59, 130, 246, 0.15);
+      color: var(--accent-blue);
+    }
+
+    .plan-badge-daily.pro {
+      background: rgba(255, 107, 0, 0.2);
+      color: var(--primary-accent);
+    }
+
+    .plan-title-head {
+      font-size: 0.95rem;
+      font-weight: 900;
+      margin: 2px 0;
+      color: #437bff;
+    }
+
+    .plan-price-num {
+      font-size: 1.35rem;
+      font-weight: 900;
+      line-height: 1.1;
+      margin: 4px 0 2px;
+    }
+
+    .plan-month-sub {
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    /* Dynamic Feature Box */
+    .features-display-box {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 14px;
+      margin-bottom: 14px;
+      animation: fadeIn 0.18s ease-out;
+    }
+
+    .feature-list-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.78rem;
+      color: var(--text-main);
+      padding: 5px 0;
+      border-bottom: 1px dashed var(--border-subtle);
+    }
+
+    .feature-list-row:last-child {
+      border-bottom: none;
+    }
+
+    /* Basic Bill Advertisement Box */
+    .tp-basic-sponsor-box {
+      border: 1px dashed #000;
+      padding: 6px 4px;
+      margin-top: 8px;
+      text-align: center;
+      background: #fdfdfd;
+      font-family: 'Courier New', Courier, monospace !important;
+    }
+  </style>
+
+  <script>
+    (function() {
+      // Current selection state
+      window.__activeSelectedTier = 'PRO'; // Default to PRO
+
+      // ----------------------------------------------------------------------
+      // 1. INJECT INTERACTIVE PLANS & FEATURE VIEWER IN MODAL
+      // ----------------------------------------------------------------------
+      function renderInteractivePlansUI() {
+        const upgradeBody = document.querySelector('#modal-pro-upgrade .modal-body');
+        if (!upgradeBody || document.getElementById('zayyam-interactive-plans-hub')) return;
+
+        // Clean out previous static cards if any
+        const oldPricing = upgradeBody.querySelector('.app-card');
+        if (oldPricing) oldPricing.remove();
+
+        const oldFeatures = upgradeBody.querySelector('div[style*="flex-direction:column; gap:8px;"]');
+        if (oldFeatures) oldFeatures.remove();
+
+        const plansHubHtml = `
+          <div id="zayyam-interactive-plans-hub">
+            <!-- 2 Clickable Cards -->
+            <div class="plans-tab-container">
+              
+              <!-- Card 1: Basic (Rs. 50/Day) -->
+              <div class="plan-interactive-card" id="card-tier-basic" onclick="switchInteractivePlan('BASIC')">
+                <span class="plan-badge-daily basic">Rs. 50 / Day</span>
+                <div class="plan-title-head">Basic Plan</div>
+                <div class="plan-price-num" style="color:var(--accent-blue);">Rs. 1,500</div>
+                <div class="plan-month-sub">Mahana License</div>
+              </div>
+
+              <!-- Card 2: PRO (Rs. 70/Day) -->
+              <div class="plan-interactive-card selected" id="card-tier-pro" onclick="switchInteractivePlan('PRO')">
+                <span class="plan-badge-daily pro">Rs. 70 / Day</span>
+                <div class="plan-title-head" style="color:var(--primary-accent);"><i class="fa-solid fa-crown" style="color:var(--accent-amber);"></i> PRO Plan</div>
+                <div class="plan-price-num" style="color:var(--primary-accent);">Rs. 2,100</div>
+                <div class="plan-month-sub">Mahana License</div>
+              </div>
+
+            </div>
+
+            <!-- Dynamic Features Container (Changes on Card Click) -->
+            <div class="features-display-box" id="active-features-container"></div>
+
+            <!-- Action Button for Selected Plan -->
+            <button class="btn btn-orange" id="btn-proceed-selected-plan" style="padding:13px; font-size:0.92rem; border-radius:12px; margin-bottom:10px;" onclick="openPaymentForActivePlan()">
+              <i class="fa-solid fa-qrcode"></i> Proceed to Pay (EasyPaisa QR)
+            </button>
+          </div>
+        `;
+
+        upgradeBody.insertAdjacentHTML('afterbegin', plansHubHtml);
+        updateActiveFeaturesList();
+      }
+
+      // ----------------------------------------------------------------------
+      // 2. SWITCH CARDS & UPDATE FEATURES ON CLICK
+      // ----------------------------------------------------------------------
+      window.switchInteractivePlan = function(tier) {
+        window.__activeSelectedTier = tier;
+
+        const basicCard = document.getElementById('card-tier-basic');
+        const proCard = document.getElementById('card-tier-pro');
+
+        if (tier === 'BASIC') {
+          basicCard?.classList.add('selected');
+          proCard?.classList.remove('selected');
+        } else {
+          proCard?.classList.add('selected');
+          basicCard?.classList.remove('selected');
+        }
+
+        if (window.haptics) window.haptics.light();
+        updateActiveFeaturesList();
+      };
+
+      function updateActiveFeaturesList() {
+        const container = document.getElementById('active-features-container');
+        const proceedBtn = document.getElementById('btn-proceed-selected-plan');
+        if (!container) return;
+
+        if (window.__activeSelectedTier === 'BASIC') {
+          // BASIC Plan Features (Rs. 50/day)
+          container.innerHTML = `
+            <div style="font-size:0.75rem; font-weight:800; color:var(--accent-blue); margin-bottom:8px; text-transform:uppercase;">
+              <i class="fa-solid fa-layer-group"></i> Basic Plan Features (Rs. 50/Day):
+            </div>
+            <div class="feature-list-row"><i class="fa-solid fa-circle-check" style="color:var(--accent-green);"></i> <span>Unlimited Fast Touch Food Counter Billing</span></div>
+            <div class="feature-list-row"><i class="fa-solid fa-circle-check" style="color:var(--accent-green);"></i> <span>Customer & Supplier Khata (Udhar / Wasooli)</span></div>
+            <div class="feature-list-row"><i class="fa-solid fa-circle-check" style="color:var(--accent-green);"></i> <span>Burger Recipes & Raw Material Stock Inventory</span></div>
+            <div class="feature-list-row"><i class="fa-solid fa-circle-check" style="color:var(--accent-green);"></i> <span>58mm / 80mm Thermal Receipt Printing</span></div>
+            <div class="feature-list-row" style="color:#f59e0b;"><i class="fa-solid fa-triangle-exclamation"></i> <span>Zayyam Tech Contact Notice on Bill</span></div>
+            <div class="feature-list-row" style="color:var(--text-dim);"><i class="fa-solid fa-lock" style="color:var(--accent-red);"></i> <span>WhatsApp Share, Galla Closing & Drive Sync Locked</span></div>
+          `;
+          if (proceedBtn) proceedBtn.innerHTML = `<i class="fa-solid fa-qrcode"></i> Pay Rs. 1,500 for Basic Plan`;
+        } else {
+          // PRO Plan Features (Rs. 70/day)
+          container.innerHTML = `
+            <div style="font-size:0.75rem; font-weight:800; color:var(--primary-accent); margin-bottom:8px; text-transform:uppercase;">
+              <i class="fa-solid fa-crown" style="color:var(--accent-amber);"></i> PRO Plan VIP Features (Rs. 70/Day):
+            </div>
+            <div class="feature-list-row"><i class="fa-solid fa-circle-check" style="color:var(--accent-green);"></i> <strong>1-Tap Direct WhatsApp Bill & Statement Share</strong></div>
+            <div class="feature-list-row"><i class="fa-solid fa-circle-check" style="color:var(--accent-green);"></i> <strong>Daily Cash Drawer & Galla Closing (Theft Detection)</strong></div>
+            <div class="feature-list-row"><i class="fa-solid fa-circle-check" style="color:var(--accent-green);"></i> <strong>Automatic Google Drive Cloud Backup (Never-Expire)</strong></div>
+            <div class="feature-list-row"><i class="fa-solid fa-circle-check" style="color:var(--accent-green);"></i> <strong>Cash In Hand Register & Profit/Loss Financial Reports</strong></div>
+            <div class="feature-list-row"><i class="fa-solid fa-circle-check" style="color:var(--accent-green);"></i> <strong>Clean Receipts (Zayyam Tech Watermark Removed)</strong></div>
+            <div class="feature-list-row"><i class="fa-solid fa-circle-check" style="color:var(--accent-green);"></i> <strong>Unlimited Restaurant Name & Profile Updates</strong></div>
+          `;
+          if (proceedBtn) proceedBtn.innerHTML = `<i class="fa-solid fa-qrcode"></i> Pay Rs. 2,100 for PRO Plan`;
+        }
+      }
+
+      // Proceed to EasyPaisa QR Modal
+      window.openPaymentForActivePlan = function() {
+        const tier = window.__activeSelectedTier || 'PRO';
+        const price = tier === 'PRO' ? 2100 : 1500;
+
+        app.closeModal('modal-pro-upgrade');
+        updateEasyPaisaModalAmount(tier, price);
+        app.openModal('modal-direct-payment');
+      };
+
+      // ----------------------------------------------------------------------
+      // 3. EASYPAISA MODAL WITH RS. 2100 EXACT PHOTO DATA
+      // ----------------------------------------------------------------------
+      function updateEasyPaisaModalAmount(tier, price) {
+        const qrContainer = document.querySelector('.easypaisa-qr-container');
+        if (!qrContainer) return;
+
+        qrContainer.innerHTML = `
+          <div class="ep-digital-badge" style="display:flex; align-items:center; justify-content:center; gap:6px; font-size:0.95rem; font-weight:800; color:#0f172a; margin-bottom:4px;">
+            <i class="fa-solid fa-circle-nodes" style="color:#059669; font-size:1.3rem;"></i>
+            <span>digital bank</span>
+          </div>
+
+          <p class="ep-scan-instruction" style="font-size:0.75rem; color:#475569; margin: 4px auto 10px; max-width:280px;">
+            Scan this QR code to send money to <strong>ZIYAM MEHMOOD</strong>'s easypaisa account
+          </p>
+
+          <!-- Exact QR Code Vector generated from your QR Image -->
+          <div class="qr-image-wrapper" style="width:210px; height:210px; margin:0 auto 10px; background:#fff; padding:6px; border-radius:12px; box-shadow:0 4px 16px rgba(0,0,0,0.12);">
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=00020101021128480014pk.easypaisa.qr0126032923828125204549953035865404${price}5802PK5913ZIYAM%20MEHMOOD6007PAKISTAN62230119FastFoodPOS_PRO6304" alt="EasyPaisa QR Code" style="width:100%; height:100%; object-fit:contain;" />
+          </div>
+
+          <div class="ep-price-tag" style="font-size:1.9rem; font-weight:900; color:#059669; margin-bottom:2px;">
+            Rs. ${price}
+          </div>
+          <div style="font-size:0.78rem; font-weight:800; color:#475569; margin-bottom:2px;">Target Plan: <strong style="color:#059669;">${tier} License</strong></div>
+          <div class="ep-account-name" style="font-size:1.05rem; font-weight:900; color:#0f172a; letter-spacing:0.5px;">
+            ZIYAM MEHMOOD
+          </div>
+          <div class="ep-account-phone" style="font-size:0.85rem; color:#334155; margin:4px 0 8px; font-weight:700;">
+            MSISDN: *******2812
+            <button class="btn-copy-mini" style="margin-left:6px;" onclick="copyPaymentNumber('03292382812')">
+              <i class="fa-solid fa-copy"></i> Copy
+            </button>
+          </div>
+
+          <div style="font-size:0.7rem; font-style:italic; color:#64748b; margin-top:4px;">
+            This QR code will expire on 03/12/2026
+          </div>
+        `;
+      }
+
+      // ----------------------------------------------------------------------
+      // 4. TID SUBMISSION WITH WHATSAPP CONFIRMATION
+      // ----------------------------------------------------------------------
+      window.verifyAndActivateLicense = function() {
+        const tid = (document.getElementById('pay-tid-input')?.value || '').trim();
+        if (!tid || tid.length < 5) {
+          alert("Barah-e-karam payment transfer ke baad aane wali sahi Trx ID (TID) enter karein.");
+          return;
+        }
+
+        const tier = window.__activeSelectedTier || 'PRO';
+        const price = tier === 'PRO' ? 2100 : 1500;
+        const profile = app.getShopProfile ? app.getShopProfile() : { name: 'Restaurant' };
+
+        let msg = `*--- ZAYYAM TECH MONTHLY SUBSCRIPTION ---*\n`;
+        msg += `Assalam-o-Alaikum Zayyam Tech,\n`;
+        msg += `Maine EasyPaisa QR Code scan karke *${tier} Plan* ki payment send kar di hai:\n\n`;
+        msg += `🔹 *Plan Name:* ${tier} (Rs. ${price} / Month)\n`;
+        msg += `🔹 *Account Name:* ZIYAM MEHMOOD\n`;
+        msg += `🔹 *Restaurant:* ${profile.name}\n`;
+        msg += `🔹 *Transaction ID (TID):* ${tid}\n`;
+        msg += `🔹 *Amount Sent:* Rs. ${price}\n\n`;
+        msg += `Barah-e-karam mera 30-Day ${tier} License activate farma dein. Shukriya!`;
+
+        const waUrl = `https://wa.me/923292382812?text=${encodeURIComponent(msg)}`;
+        window.open(waUrl, '_blank');
+
+        app.closeModal('modal-direct-payment');
+        alert(`Aapki ${tier} Plan (Rs. ${price}) request verification ke liye WhatsApp par bhej di gayi hai! Zayyam Tech jald confirm karega.`);
+      };
+
+      // ----------------------------------------------------------------------
+      // 5. BILL FOOTER BRANDING (CLEAN ON PRO, NOTICE ON BASIC)
+      // ----------------------------------------------------------------------
+      const origShowInvoiceSlip = app.showInvoiceSlip;
+      app.showInvoiceSlip = function(sale, items) {
+        origShowInvoiceSlip.call(this, sale, items);
+
+        const currentTier = localStorage.getItem('zayyam_pos_tier');
+        const receipt = document.getElementById('actual-sale-receipt');
+        if (!receipt) return;
+
+        // If PRO: Clean white-label receipt
+        if (currentTier === 'PRO') {
+          const basicBoxes = receipt.querySelectorAll('.tp-basic-sponsor-box');
+          basicBoxes.forEach(b => b.remove());
+          const footers = receipt.querySelectorAll('.tp-footer-branding');
+          footers.forEach(f => f.innerHTML = 'Thank you for dining with us!');
+          return;
+        }
+
+        // If BASIC / Free: Notice on Receipt
+        const existingSponsor = receipt.querySelector('.tp-basic-sponsor-box');
+        if (!existingSponsor) {
+          const promoHtml = `
+            <div class="tp-basic-sponsor-box">
+              <div style="font-weight:900; font-size:11px; letter-spacing:0.5px;">SOFTWARE BY: ZAYYAM TECH</div>
+              <div style="font-size:10px; font-weight:bold; margin:2px 0;">Apni Shop Ka POS Software Banwayen</div>
+              <div style="font-size:11px; font-weight:900;">WhatsApp / Call: 0329-2382812</div>
+            </div>
+          `;
+          const lastEl = receipt.querySelector('.tp-center:last-child') || receipt;
+          lastEl.insertAdjacentHTML('beforeend', promoHtml);
+        }
+      };
+
+      // Hooks
+      document.addEventListener('DOMContentLoaded', () => {
+        renderInteractivePlansUI();
+      });
+      renderInteractivePlansUI();
+    })();
+  </script>
+  <!-- ========================================================================
+       EXTENSION: REMAINING DAYS PLAN TRACKER (UNDER ACTIVATE KEY) & MONTHLY KEYS
+       (Paste this code right before </body>)
+       ======================================================================== -->
+
+  <style>
+    /* Remaining Days & Active Plan Status Card */
+    .plan-status-tracker-box {
+      background: var(--bg-surface);
+      border: 1.5px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 12px 14px;
+      margin-top: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      animation: fadeIn 0.18s ease-out;
+    }
+
+    .plan-status-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .plan-days-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.8rem;
+      font-weight: 800;
+      padding: 4px 10px;
+      border-radius: var(--radius-full);
+    }
+
+    .plan-days-badge.green {
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--accent-green);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .plan-days-badge.amber {
+      background: rgba(245, 158, 11, 0.15);
+      color: var(--accent-amber);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    .plan-days-badge.red {
+      background: rgba(239, 68, 68, 0.15);
+      color: var(--accent-red);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+  </style>
+
+  <script>
+    (function() {
+      // ----------------------------------------------------------------------
+      // 1. INJECT REMAINING DAYS DISPLAY UNDER ACTIVATE KEY INPUT (SETTINGS & MODAL)
+      // ----------------------------------------------------------------------
+      function injectRemainingDaysTrackerUI() {
+        // Target: In PRO Upgrade Modal & Settings Card
+        const containers = [
+          document.querySelector('#modal-pro-upgrade .modal-body'),
+          document.getElementById('card-pro-status-box')
+        ];
+
+        containers.forEach(container => {
+          if (!container) return;
+          // Find the license key input container
+          const keyInput = container.querySelector('#input-license-key');
+          if (keyInput) {
+            const keyBox = keyInput.closest('div[style*="background:var(--bg-surface-elevated)"]') || keyInput.parentElement;
+            if (keyBox && !keyBox.querySelector('.plan-status-tracker-box')) {
+              const trackerDiv = document.createElement('div');
+              trackerDiv.className = 'plan-status-tracker-box';
+              trackerDiv.id = 'zayyam-live-plan-tracker';
+              keyBox.appendChild(trackerDiv);
+            }
+          }
+        });
+
+        updateRemainingDaysDisplay();
+      }
+
+      // ----------------------------------------------------------------------
+      // 2. LIVE CALCULATE ACTIVE PLAN & REMAINING DAYS
+      // ----------------------------------------------------------------------
+      function updateRemainingDaysDisplay() {
+        const trackerBoxes = document.querySelectorAll('.plan-status-tracker-box');
+        if (trackerBoxes.length === 0) return;
+
+        const currentTier = localStorage.getItem('zayyam_pos_tier') || 'FREE';
+        const expiryTime = Number(localStorage.getItem('zayyam_license_expiry')) || 0;
+        const now = Date.now();
+
+        let daysRemaining = 0;
+        let isExpired = false;
+
+        if (expiryTime > 0) {
+          const diffMs = expiryTime - now;
+          if (diffMs > 0) {
+            daysRemaining = Math.ceil(diffMs / (24 * 60 * 60 * 1000));
+          } else {
+            isExpired = true;
+          }
+        }
+
+        trackerBoxes.forEach(box => {
+          if (currentTier === 'PRO' && !isExpired) {
+            const badgeColor = daysRemaining > 5 ? 'green' : 'amber';
+            const expDateStr = new Date(expiryTime).toLocaleDateString('en-GB');
+
+            box.style.borderColor = 'rgba(255, 107, 0, 0.4)';
+            box.innerHTML = `
+              <div class="plan-status-header-row">
+                <span style="font-size:0.82rem; font-weight:800; color:var(--primary-accent);">
+                  <i class="fa-solid fa-crown" style="color:var(--accent-amber);"></i> PRO Plan Active (Rs. 70/Day)
+                </span>
+                <span class="plan-days-badge ${badgeColor}">
+                  <i class="fa-solid fa-clock"></i> ${daysRemaining} Din Baqi Hain
+                </span>
+              </div>
+              <div style="display:flex; justify-content:space-between; font-size:0.7rem; color:var(--text-muted); margin-top:2px;">
+                <span>Status: Tamam Features Unlocked</span>
+                <span>Expiry: <strong>${expDateStr}</strong></span>
+              </div>
+            `;
+          } else if (currentTier === 'BASIC' && !isExpired) {
+            const badgeColor = daysRemaining > 5 ? 'green' : 'amber';
+            const expDateStr = new Date(expiryTime).toLocaleDateString('en-GB');
+
+            box.style.borderColor = 'rgba(59, 130, 246, 0.4)';
+            box.innerHTML = `
+              <div class="plan-status-header-row">
+                <span style="font-size:0.82rem; font-weight:800; color:var(--accent-blue);">
+                  <i class="fa-solid fa-layer-group"></i> Basic Plan Active (Rs. 50/Day)
+                </span>
+                <span class="plan-days-badge ${badgeColor}">
+                  <i class="fa-solid fa-clock"></i> ${daysRemaining} Din Baqi Hain
+                </span>
+              </div>
+              <div style="display:flex; justify-content:space-between; font-size:0.7rem; color:var(--text-muted); margin-top:2px;">
+                <span>Status: Standard POS Unlocked</span>
+                <span>Expiry: <strong>${expDateStr}</strong></span>
+              </div>
+            `;
+          } else {
+            // Free / Expired State
+            box.style.borderColor = 'rgba(239, 68, 68, 0.4)';
+            box.innerHTML = `
+              <div class="plan-status-header-row">
+                <span style="font-size:0.82rem; font-weight:800; color:var(--accent-red);">
+                  <i class="fa-solid fa-circle-exclamation"></i> ${isExpired ? 'Plan Expire Ho Chuka Hai' : 'Free / Trial Mode'}
+                </span>
+                <span class="plan-days-badge red">
+                  <i class="fa-solid fa-lock"></i> 0 Din (Locked)
+                </span>
+              </div>
+              <div style="font-size:0.7rem; color:var(--text-muted); margin-top:2px;">
+                Barah-e-karam EasyPaisa QR scan karein ya Zayyam Tech se license key le kar renew karein.
+              </div>
+            `;
+          }
+        });
+      }
+
+      // ----------------------------------------------------------------------
+      // 3. ENHANCED LICENSE KEY ACTIVATION (SUPPORTS BOTH BASIC & PRO KEYS)
+      // ----------------------------------------------------------------------
+      if (window.zayyamLicense) {
+        window.zayyamLicense.activateKey = function() {
+          const keyInput = document.getElementById('input-license-key');
+          const key = (keyInput ? keyInput.value : '').trim().toUpperCase();
+
+          if (!key) {
+            alert('Pehle License Key enter karein!');
+            return;
+          }
+
+          const now = Date.now();
+          const thirtyDaysMs = 30 * 24 * 60 * 60 * 1000;
+
+          // 1. Master Lifetime Keys
+          if (key === 'ZAYYAM-PRO-2026' || key === 'ZAYYAM-VIP-LIFETIME') {
+            localStorage.setItem('zayyam_pos_tier', 'PRO');
+            localStorage.setItem('zayyam_license_expiry', now + (365 * 24 * 60 * 60 * 1000)); // 1 Year / Lifetime
+            alert('Mubarak Ho! Zayyam Tech PRO Lifetime License Activate ho chuka hai!');
+            location.reload();
+            return;
+          }
+
+          // 2. Monthly PRO Keys (Starts with PRO-) e.g., PRO-7788, PRO-2026
+          if (key.startsWith('PRO-') || key.includes('PRO')) {
+            localStorage.setItem('zayyam_pos_tier', 'PRO');
+            localStorage.setItem('zayyam_license_expiry', now + thirtyDaysMs);
+            alert('Mubarak Ho! PRO Plan (Rs. 70/Day) 30 Din ke liye Kamyabi se Activate ho gaya hai!');
+            location.reload();
+            return;
+          }
+
+          // 3. Monthly BASIC Keys (Starts with BASIC-) e.g., BASIC-1500, BASIC-9944
+          if (key.startsWith('BASIC-') || key.includes('BASIC')) {
+            localStorage.setItem('zayyam_pos_tier', 'BASIC');
+            localStorage.setItem('zayyam_license_expiry', now + thirtyDaysMs);
+            alert('Mubarak Ho! Basic Plan (Rs. 50/Day) 30 Din ke liye Kamyabi se Activate ho gaya hai!');
+            location.reload();
+            return;
+          }
+
+          // Invalid Key
+          alert('Ghalt License Key! Please contact Zayyam Tech (0329-2382812) to get a valid 30-day Key.');
+        };
+      }
+
+      // ----------------------------------------------------------------------
+      // 4. HOOKS & TIMERS
+      // ----------------------------------------------------------------------
+      document.addEventListener('DOMContentLoaded', () => {
+        injectRemainingDaysTrackerUI();
+      });
+
+      // Hook into Settings Navigation to always keep countdown fresh
+      const origNav = app.navigateTo;
+      app.navigateTo = function(viewId, pushHistory = true) {
+        origNav.call(this, viewId, pushHistory);
+        if (viewId === 'settings') {
+          setTimeout(injectRemainingDaysTrackerUI, 50);
+        }
+      };
+
+      // Periodic Live Refresh
+      setInterval(updateRemainingDaysDisplay, 30000); // Har 30 second baad auto update
+      injectRemainingDaysTrackerUI();
+    })();
+  </script>
+  <!-- ========================================================================
+       EXTENSION: 24-HOUR SECURITY LOCKOUT (ON WRONG KEYS) & MASTER UNLOCK (zayyam733)
+       (Paste this code right before </body>)
+       ======================================================================== -->
+
+  <style>
+    /* 24-Hour Penalty Alert Banner */
+    .penalty-lockout-card {
+      background: rgba(239, 68, 68, 0.12);
+      border: 1.5px solid var(--accent-red);
+      border-radius: var(--radius-md);
+      padding: 12px;
+      margin-top: 10px;
+      text-align: center;
+      animation: fadeIn 0.2s ease-out;
+    }
+
+    .penalty-timer-clock {
+      font-size: 1.25rem;
+      font-weight: 900;
+      color: var(--accent-red);
+      letter-spacing: 1px;
+      margin: 4px 0;
+    }
+  </style>
+
+  <script>
+    (function() {
+      const MASTER_OVERRIDE_KEY = 'ZAYYAM733'; // Secret unlock code
+      const LOCKOUT_DURATION_MS = 24 * 60 * 60 * 1000; // 24 Hours
+
+      // ----------------------------------------------------------------------
+      // 1. CHECK AND RENDER 24-HOUR LOCKOUT STATE
+      // ----------------------------------------------------------------------
+      function checkLockoutState() {
+        const lockUntil = Number(localStorage.getItem('zayyam_security_lock_until')) || 0;
+        const now = Date.now();
+        const isLocked = lockUntil > now;
+
+        const trackerBox = document.getElementById('zayyam-live-plan-tracker');
+        const keyInput = document.getElementById('input-license-key');
+        const activateBtn = document.querySelector('button[onclick*="activateKey"]');
+
+        if (isLocked) {
+          const diffMs = lockUntil - now;
+          const hours = Math.floor(diffMs / (1000 * 60 * 60));
+          const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+          const seconds = Math.floor((diffMs % (1000 * 60)) / 1000);
+
+          if (trackerBox) {
+            trackerBox.innerHTML = `
+              <div class="penalty-lockout-card">
+                <div style="font-size:0.82rem; font-weight:800; color:var(--accent-red);">
+                  <i class="fa-solid fa-triangle-exclamation"></i> Security Alert: 24-Hour Lockout Active!
+                </div>
+                <div style="font-size:0.7rem; color:var(--text-muted); margin-top:2px;">
+                  Ghalt license keys daalne ki wajah se system 24 ghante ke liye block kar diya gaya hai.
+                </div>
+                <div class="penalty-timer-clock">
+                  <i class="fa-solid fa-clock"></i> ${hours}h : ${minutes}m : ${seconds}s
+                </div>
+                <div style="font-size:0.68rem; color:#cbd5e1; margin-top:4px;">
+                   Unlock ke liye Zayyam Tech (0329-2382812) se rabta karein.
+                </div>
+              </div>
+            `;
+          }
+
+          if (keyInput) {
+            keyInput.placeholder = "Enter Unlock Code (zayyam733)";
+          }
+        }
+      }
+
+      // ----------------------------------------------------------------------
+      // 2. UPGRADE ACTIVATE KEY WITH ATTEMPT COUNTER & MASTER OVERRIDE
+      // ----------------------------------------------------------------------
+      if (window.zayyamLicense) {
+        window.zayyamLicense.activateKey = function() {
+          const keyInput = document.getElementById('input-license-key');
+          const key = (keyInput ? keyInput.value : '').trim().toUpperCase();
+
+          if (!key) {
+            alert('Pehle License Key enter karein!');
+            return;
+          }
+
+          const now = Date.now();
+          const thirtyDaysMs = 30 * 24 * 60 * 60 * 1000;
+
+          // A. MASTER EMERGENCY UNLOCK CODE: zayyam733
+          if (key === MASTER_OVERRIDE_KEY || key === 'ZAYYAM733') {
+            // Remove 24-hour penalty
+            localStorage.removeItem('zayyam_security_lock_until');
+            localStorage.removeItem('zayyam_wrong_key_attempts');
+
+            // Grant Full PRO Access for 30 Days
+            localStorage.setItem('zayyam_pos_tier', 'PRO');
+            localStorage.setItem('zayyam_license_expiry', now + thirtyDaysMs);
+
+            alert('Mubarak Ho! Master Code (zayyam733) se 24-Hour Lock foran khatam ho gaya aur PRO Plan Unlock ho chuka hai!');
+            location.reload();
+            return;
+          }
+
+          // B. If already in 24-Hour Lock, prevent standard keys
+          const lockUntil = Number(localStorage.getItem('zayyam_security_lock_until')) || 0;
+          if (lockUntil > now) {
+            alert('System 24 ghante ke liye locked hai! Sirf Master Code (zayyam733) se unlock hoga.');
+            return;
+          }
+
+          // C. Master Lifetime Keys
+          if (key === 'ZAYYAM-PRO-2026' || key === 'ZAYYAM-VIP-LIFETIME') {
+            localStorage.removeItem('zayyam_wrong_key_attempts');
+            localStorage.setItem('zayyam_pos_tier', 'PRO');
+            localStorage.setItem('zayyam_license_expiry', now + (365 * 24 * 60 * 60 * 1000));
+            alert('PRO Lifetime License Activate ho chuka hai!');
+            location.reload();
+            return;
+          }
+
+          // D. Monthly PRO Keys (PRO-XXXX)
+          if (key.startsWith('PRO-') || key.includes('PRO')) {
+            localStorage.removeItem('zayyam_wrong_key_attempts');
+            localStorage.setItem('zayyam_pos_tier', 'PRO');
+            localStorage.setItem('zayyam_license_expiry', now + thirtyDaysMs);
+            alert('Mubarak Ho! PRO Plan (Rs. 70/Day) 30 Din ke liye Activate ho gaya hai!');
+            location.reload();
+            return;
+          }
+
+          // E. Monthly BASIC Keys (BASIC-XXXX)
+          if (key.startsWith('BASIC-') || key.includes('BASIC')) {
+            localStorage.removeItem('zayyam_wrong_key_attempts');
+            localStorage.setItem('zayyam_pos_tier', 'BASIC');
+            localStorage.setItem('zayyam_license_expiry', now + thirtyDaysMs);
+            alert('Mubarak Ho! Basic Plan (Rs. 50/Day) 30 Din ke liye Activate ho gaya hai!');
+            location.reload();
+            return;
+          }
+
+          // ------------------------------------------------------------------
+          // F. WRONG KEY ENTERED: TRACK ATTEMPTS -> APPLY 24-HOUR LOCK
+          // ------------------------------------------------------------------
+          let attempts = Number(localStorage.getItem('zayyam_wrong_key_attempts')) || 0;
+          attempts += 1;
+          localStorage.setItem('zayyam_wrong_key_attempts', attempts);
+
+          if (attempts >= 3) {
+            // Apply 24-Hour Penalty Lockout
+            localStorage.setItem('zayyam_security_lock_until', now + LOCKOUT_DURATION_MS);
+            alert('⚠️ DANGER: 3 dafa ghalt key daalne par system 24 GHANTE ke liye LOCK kar diya gaya hai! Ab sirf Zayyam Tech ke Master Code se unlock hoga.');
+            checkLockoutState();
+          } else {
+            const left = 3 - attempts;
+            alert(`Ghalt License Key! Agar ${left} dafa aur ghalt key dali to system 24 ghante ke liye LOCK ho jayega.`);
+          }
+        };
+      }
+
+      // Check timer every second if locked
+      setInterval(checkLockoutState, 1000);
+
+      document.addEventListener('DOMContentLoaded', checkLockoutState);
+      checkLockoutState();
+    })();
+  </script>
+  
+  <!-- ========================================================================
+       STRICT ENFORCEMENT: LOCK WHATSAPP, GALLA & DRIVE IN BASIC + MANDATORY BILL ADS
+       (Paste this code right before </body>)
+       ======================================================================== -->
+
+  <style>
+    /* High-Visibility Zayyam Tech Contact Box for Basic & Free Tier Bills */
+    .tp-mandatory-sponsor-box {
+      border: 1.5px dashed #000000 !important;
+      padding: 6px 4px !important;
+      margin-top: 8px !important;
+      margin-bottom: 4px !important;
+      text-align: center !important;
+      background: #ffffff !important;
+      color: #000000 !important;
+      font-family: 'Courier New', Courier, monospace !important;
+      box-sizing: border-box !important;
+      display: block !important;
+    }
+
+    .tp-sponsor-brand {
+      font-size: 11.5px !important;
+      font-weight: 900 !important;
+      letter-spacing: 0.5px !important;
+      text-transform: uppercase !important;
+      margin-bottom: 2px !important;
+    }
+
+    .tp-sponsor-tagline {
+      font-size: 9.5px !important;
+      font-weight: 700 !important;
+      margin-bottom: 3px !important;
+    }
+
+    .tp-sponsor-phone {
+      font-size: 11px !important;
+      font-weight: 900 !important;
+      border-top: 1px dashed #000000 !important;
+      padding-top: 2px !important;
+      margin-top: 2px !important;
+    }
+  </style>
+
+  <script>
+    (function() {
+      // ----------------------------------------------------------------------
+      // 1. STRICT PRO CHECK HELPER (ONLY TRUE IF CURRENT TIER IS STRICTLY PRO)
+      // ----------------------------------------------------------------------
+      function isStrictlyProUser() {
+        const tier = localStorage.getItem('zayyam_pos_tier');
+        const expiry = Number(localStorage.getItem('zayyam_license_expiry')) || 0;
+        const isNotExpired = (expiry > Date.now());
+
+        // Basic Plan ya Free Plan par PRO features KABHI unlock nahi honge
+        return (tier === 'PRO' && isNotExpired);
+      }
+
+      // ----------------------------------------------------------------------
+      // 2. HARD LOCK WHATSAPP SHARE IN BASIC / FREE TIER
+      // ----------------------------------------------------------------------
+      const baseShareWA = app.shareCurrentSaleWhatsApp;
+      app.shareCurrentSaleWhatsApp = function() {
+        if (!isStrictlyProUser()) {
+          alert("⚠️ LOCKED: WhatsApp 1-Tap Bill Share sirf PRO Plan (Rs. 70/Day) mein dastiyab hai!\nBasic Plan mein yeh feature lock hai.");
+          if (window.zayyamLicense) {
+            window.zayyamLicense.promptUpgrade('WhatsApp Instant Bill Share');
+          } else {
+            app.openModal('modal-pro-upgrade');
+          }
+          return;
+        }
+        if (baseShareWA) baseShareWA.call(this);
+      };
+
+      // Customer Khata WhatsApp Share Lock
+      const baseCustWA = app.shareCustomerKhataWhatsApp;
+      if (baseCustWA) {
+        app.shareCustomerKhataWhatsApp = function() {
+          if (!isStrictlyProUser()) {
+            alert("⚠️ LOCKED: Customer Khata WhatsApp Share sirf PRO Plan mein dastiyab hai!");
+            app.openModal('modal-pro-upgrade');
+            return;
+          }
+          baseCustWA.call(this);
+        };
+      }
+
+      // ----------------------------------------------------------------------
+      // 3. HARD LOCK DAILY CASH DRAWER / GALLA CLOSING IN BASIC / FREE TIER
+      // ----------------------------------------------------------------------
+      const baseOpenDayEnd = app.openDayEndClosingModal;
+      app.openDayEndClosingModal = function() {
+        if (!isStrictlyProUser()) {
+          alert("⚠️ LOCKED: Daily Galla Audit / Cash Drawer Closing sirf PRO Plan (Rs. 70/Day) mein dastiyab hai!\nBasic Plan mein yeh feature lock hai.");
+          if (window.zayyamLicense) {
+            window.zayyamLicense.promptUpgrade('Daily Cash Drawer / Galla Closing');
+          } else {
+            app.openModal('modal-pro-upgrade');
+          }
+          return;
+        }
+        if (baseOpenDayEnd) baseOpenDayEnd.call(this);
+      };
+
+      // ----------------------------------------------------------------------
+      // 4. HARD LOCK GOOGLE DRIVE CLOUD SYNC IN BASIC / FREE TIER
+      // ----------------------------------------------------------------------
+      if (window.gdriveSync) {
+        const baseDriveConnect = window.gdriveSync.connectAccount;
+        window.gdriveSync.connectAccount = function() {
+          if (!isStrictlyProUser()) {
+            alert("⚠️ LOCKED: Google Drive Cloud Backup sirf PRO Plan (Rs. 70/Day) mein dastiyab hai!\nBasic Plan mein yeh feature lock hai.");
+            if (window.zayyamLicense) {
+              window.zayyamLicense.promptUpgrade('Google Drive Cloud Backup');
+            } else {
+              app.openModal('modal-pro-upgrade');
+            }
+            return;
+          }
+          if (baseDriveConnect) baseDriveConnect.call(this);
+        };
+
+        const baseDriveUpload = window.gdriveSync.uploadToDrive;
+        window.gdriveSync.uploadToDrive = function(isSilent) {
+          if (!isStrictlyProUser()) return; // Silent block for auto sync
+          if (baseDriveUpload) baseDriveUpload.call(this, isSilent);
+        };
+      }
+
+      // ----------------------------------------------------------------------
+      // 5. HARD LOCK CASH IN HAND REGISTER & P&L REPORTS IN BASIC / FREE TIER
+      // ----------------------------------------------------------------------
+      const baseNavigate = app.navigateTo;
+      app.navigateTo = function(viewId, pushHistory = true) {
+        if (!isStrictlyProUser()) {
+          if (viewId === 'cashinhand') {
+            alert("⚠️ LOCKED: Cash in Hand Register sirf PRO Plan mein dastiyab hai!");
+            app.openModal('modal-pro-upgrade');
+            return;
+          }
+          if (viewId === 'reports') {
+            alert("⚠️ LOCKED: Profit & Loss Reports sirf PRO Plan mein dastiyab hai!");
+            app.openModal('modal-pro-upgrade');
+            return;
+          }
+        }
+        baseNavigate.call(this, viewId, pushHistory);
+      };
+
+      // ----------------------------------------------------------------------
+      // 6. MANDATORY ZAYYAM TECH CONTACT BOX ON BASIC & FREE THERMAL RECEIPTS
+      // ----------------------------------------------------------------------
+      const baseShowInvoice = app.showInvoiceSlip;
+      app.showInvoiceSlip = function(sale, items) {
+        baseShowInvoice.call(this, sale, items);
+
+        const receipt = document.getElementById('actual-sale-receipt');
+        if (!receipt) return;
+
+        // Clean out previous temporary boxes
+        const oldBoxes = receipt.querySelectorAll('.tp-mandatory-sponsor-box, .tp-basic-sponsor-box');
+        oldBoxes.forEach(b => b.remove());
+
+        // Agar STRICT PRO USER HAI to clean receipt (No watermark)
+        if (isStrictlyProUser()) {
+          const footers = receipt.querySelectorAll('.tp-footer-branding');
+          footers.forEach(f => f.innerHTML = 'Thank you for dining with us!');
+          return;
+        }
+
+        // AGAR BASIC YA FREE USER HAI: Bada aur wazeh Zayyam Tech Contact Box print karein
+        const sponsorBoxHtml = `
+          <div class="tp-mandatory-sponsor-box">
+            <div class="tp-sponsor-brand">SOFTWARE: ZAYYAM TECH</div>
+            <div class="tp-sponsor-tagline">Apni Dukan Ka POS Software Banwayen</div>
+            <div class="tp-sponsor-phone">Helpline: 0329-2382812</div>
+          </div>
+        `;
+
+        const lastElement = receipt.querySelector('.tp-center:last-child') || receipt;
+        lastElement.insertAdjacentHTML('beforeend', sponsorBoxHtml);
+      };
+    })();
+  </script>
+  
+  
+  
+  
 </body>
 </html>
