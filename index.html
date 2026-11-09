@@ -12233,194 +12233,183 @@ ATA -->
   </script>
   
   <!-- ========================================================================
-       5-DAY FULL TRIAL GRACE PERIOD -> POST-TRIAL STRICT PRO LOCK & BILL ADS
+       EXTENSION: 5-DAY VIP TRIAL ACTIVATION BUTTON (IN MANAGE LICENSE MODAL)
        (Paste this code right before </body>)
        ======================================================================== -->
 
   <style>
-    /* Zayyam Tech Contact Box on Bill (Shows after 5 days trial or on Basic Plan) */
-    .tp-mandatory-sponsor-box {
-      border: 1.5px dashed #000000 !important;
-      padding: 6px 4px !important;
-      margin-top: 8px !important;
-      margin-bottom: 4px !important;
-      text-align: center !important;
-      background: #ffffff !important;
-      color: #000000 !important;
-      font-family: 'Courier New', Courier, monospace !important;
-      box-sizing: border-box !important;
-      display: block !important;
+    /* 5-Day Trial Activation Box Styling */
+    .trial-starter-box {
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.12), rgba(16, 23, 40, 0.95));
+      border: 1.5px dashed var(--accent-amber);
+      border-radius: var(--radius-md);
+      padding: 12px 14px;
+      margin-bottom: 12px;
+      text-align: center;
+      animation: fadeIn 0.2s ease-out;
     }
 
-    .tp-sponsor-brand {
-      font-size: 11.5px !important;
-      font-weight: 900 !important;
-      letter-spacing: 0.5px !important;
-      text-transform: uppercase !important;
-      margin-bottom: 2px !important;
+    .btn-activate-trial {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      color: #ffffff;
+      border: none;
+      border-radius: var(--radius-md);
+      padding: 10px 18px;
+      font-size: 0.88rem;
+      font-weight: 800;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 4px 14px rgba(245, 158, 11, 0.35);
+      transition: transform 0.15s ease;
+      margin-top: 6px;
     }
 
-    .tp-sponsor-tagline {
-      font-size: 9.5px !important;
-      font-weight: 700 !important;
-      margin-bottom: 3px !important;
-    }
-
-    .tp-sponsor-phone {
-      font-size: 11px !important;
-      font-weight: 900 !important;
-      border-top: 1px dashed #000000 !important;
-      padding-top: 2px !important;
-      margin-top: 2px !important;
+    .btn-activate-trial:active {
+      transform: scale(0.95);
     }
   </style>
 
   <script>
     (function() {
-      const FIVE_DAYS_MS = 5 * 24 * 60 * 60 * 1000;
+      const TRIAL_DURATION_MS = 5 * 24 * 60 * 60 * 1000; // Exact 5 Days
 
       // ----------------------------------------------------------------------
-      // 1. INTELLIGENT ACCESS CHECK: ACTIVE TRIAL OR PRO LICENSE
+      // 1. INJECT 5-DAY TRIAL BUTTON INSIDE MANAGE LICENSE MODAL
       // ----------------------------------------------------------------------
-      function hasProAccessOrActiveTrial() {
-        // A. Check if user is currently inside 5-Day Free Trial
-        let installTime = localStorage.getItem('zayyam_install_time_v5');
-        if (!installTime) {
-          installTime = Date.now();
-          localStorage.setItem('zayyam_install_time_v5', installTime);
+      function injectTrialButtonInModal() {
+        const upgradeBody = document.querySelector('#modal-pro-upgrade .modal-body');
+        if (!upgradeBody || document.getElementById('zayyam-trial-starter-container')) return;
+
+        const hasUsedTrial = localStorage.getItem('zayyam_trial_used_once') === 'true';
+        const isTrialRunning = isTrialCurrentlyActive();
+        const isPurchasedPro = localStorage.getItem('zayyam_pos_tier') === 'PRO';
+
+        const trialContainer = document.createElement('div');
+        trialContainer.id = 'zayyam-trial-starter-container';
+
+        if (isPurchasedPro) {
+          // Already Paid PRO User
+          trialContainer.innerHTML = '';
+        } else if (isTrialRunning) {
+          // Trial is Active Right Now
+          const timeLeftMs = Number(localStorage.getItem('zayyam_trial_expiry_time')) - Date.now();
+          const daysLeft = Math.ceil(timeLeftMs / (24 * 60 * 60 * 1000));
+
+          trialContainer.innerHTML = `
+            <div class="trial-starter-box" style="border-style: solid; border-color: var(--accent-green);">
+              <div style="font-size:0.85rem; font-weight:800; color:var(--accent-green);">
+                <i class="fa-solid fa-crown" style="color:var(--accent-amber);"></i> 5-Day VIP Free Trial Active!
+              </div>
+              <div style="font-size:0.72rem; color:var(--text-muted); margin:3px 0 6px;">
+                Tamam PRO features (WhatsApp Share, Galla Closing, Cloud Sync) agle <strong>${daysLeft} Din</strong> ke liye bilkul free unlocked hain.
+              </div>
+            </div>
+          `;
+        } else if (!hasUsedTrial) {
+          // Eligible for 5-Day Free Trial
+          trialContainer.innerHTML = `
+            <div class="trial-starter-box">
+              <div style="font-size:0.85rem; font-weight:900; color:var(--accent-amber);">
+                <i class="fa-solid fa-gift"></i> New User Offer: 5-Day Free Trial
+              </div>
+              <p style="font-size:0.72rem; color:var(--text-muted); margin:3px 0 6px;">
+                Bina kisi payment ke 5 din ke liye tamam PRO features (Galla Closing, WhatsApp, Drive Sync) chala kar check karein!
+              </p>
+              <button type="button" class="btn-activate-trial" onclick="startFiveDayFreeTrial()">
+                <i class="fa-solid fa-bolt"></i> Start 5-Day Free Trial (5 Din Free Chalaen)
+              </button>
+            </div>
+          `;
+        } else {
+          // Trial Expired and Already Used
+          trialContainer.innerHTML = `
+            <div class="trial-starter-box" style="border-color: rgba(239, 68, 68, 0.4); background: rgba(239, 68, 68, 0.08);">
+              <div style="font-size:0.82rem; font-weight:800; color:var(--accent-red);">
+                <i class="fa-solid fa-clock-rotate-left"></i> 5-Day Free Trial Expired
+              </div>
+              <div style="font-size:0.7rem; color:var(--text-muted); margin-top:2px;">
+                Aapka 5 din ka free trial mukammal ho chuka hai. Tamam locked features dobara shuru karne ke liye Basic ya PRO plan activate karein.
+              </div>
+            </div>
+          `;
         }
 
-        const isTrialActive = (Date.now() - Number(installTime)) < FIVE_DAYS_MS;
-        const tier = localStorage.getItem('zayyam_pos_tier');
-        const expiry = Number(localStorage.getItem('zayyam_license_expiry')) || 0;
-        const isSubscriptionValid = (expiry > Date.now());
-
-        // Agar pehle 5 din chal rahe hain -> Sab kuch Free Unlock!
-        if (isTrialActive && !tier) {
-          return true;
-        }
-
-        // Agar 5 din guzar gaye, to sirf PRO plan wale ko access milega
-        if (tier === 'PRO' && isSubscriptionValid) {
-          return true;
-        }
-
-        // 5 din ke baad Free aur Basic plan dono par yeh features LOCK rahenge
-        return false;
+        // Insert at the top of the modal body
+        upgradeBody.insertBefore(trialContainer, upgradeBody.firstChild);
       }
 
       // ----------------------------------------------------------------------
-      // 2. WHATSAPP SHARE: ALLOW IN TRIAL, LOCK AFTER TRIAL (UNLESS PRO)
+      // 2. TRIAL ACTIVATION HANDLER (CLICK EVENT)
       // ----------------------------------------------------------------------
-      const baseShareWA = app.shareCurrentSaleWhatsApp;
-      app.shareCurrentSaleWhatsApp = function() {
-        if (!hasProAccessOrActiveTrial()) {
-          alert("⚠️ 5-Day Free Trial Expired!\nWhatsApp 1-Tap Bill Share sirf PRO Plan (Rs. 70/Day) mein dastiyab hai.");
-          app.openModal('modal-pro-upgrade');
+      window.startFiveDayFreeTrial = function() {
+        const hasUsed = localStorage.getItem('zayyam_trial_used_once');
+        if (hasUsed === 'true') {
+          alert('Aap pehle hi 5 din ka free trial use kar chuke hain! Ab sirf EasyPaisa payment se renew ho sakta hai.');
           return;
         }
-        if (baseShareWA) baseShareWA.call(this);
+
+        const now = Date.now();
+        const expiry = now + TRIAL_DURATION_MS;
+
+        // Set Trial Flags in Storage
+        localStorage.setItem('zayyam_trial_used_once', 'true');
+        localStorage.setItem('zayyam_trial_active', 'true');
+        localStorage.setItem('zayyam_trial_expiry_time', expiry);
+
+        // Grant PRO Privileges for 5 days
+        localStorage.setItem('zayyam_pos_tier', 'PRO');
+        localStorage.setItem('zayyam_license_expiry', expiry);
+
+        alert('🎉 Mubarak Ho! Aapka 5 Din ka Free VIP Trial Activate ho gaya hai!\nTamam PRO Features (WhatsApp, Galla Closing, Drive Sync) 5 din ke liye unlock ho chuke hain.');
+        app.closeModal('modal-pro-upgrade');
+        location.reload();
       };
 
-      const baseCustWA = app.shareCustomerKhataWhatsApp;
-      if (baseCustWA) {
-        app.shareCustomerKhataWhatsApp = function() {
-          if (!hasProAccessOrActiveTrial()) {
-            alert("⚠️ 5-Day Free Trial Expired!\nCustomer Khata WhatsApp Share sirf PRO Plan mein dastiyab hai.");
-            app.openModal('modal-pro-upgrade');
-            return;
-          }
-          baseCustWA.call(this);
-        };
+      // ----------------------------------------------------------------------
+      // 3. CHECK TRIAL EXPIRY & AUTOMATIC POST-TRIAL LOCK
+      // ----------------------------------------------------------------------
+      function isTrialCurrentlyActive() {
+        const isTrial = localStorage.getItem('zayyam_trial_active') === 'true';
+        const expiry = Number(localStorage.getItem('zayyam_trial_expiry_time')) || 0;
+        return (isTrial && expiry > Date.now());
+      }
+
+      function enforceTrialLockCheck() {
+        const isTrial = localStorage.getItem('zayyam_trial_active') === 'true';
+        const expiry = Number(localStorage.getItem('zayyam_trial_expiry_time')) || 0;
+
+        if (isTrial && expiry <= Date.now()) {
+          // 5 DAYS COMPLETE -> AUTOMATIC HARD LOCK
+          localStorage.removeItem('zayyam_trial_active');
+          localStorage.removeItem('zayyam_trial_expiry_time');
+          
+          // Revert to FREE Tier
+          localStorage.setItem('zayyam_pos_tier', 'FREE');
+          localStorage.removeItem('zayyam_license_expiry');
+
+          alert('⚠️ NOTIFICATION: Aapka 5 din ka Free VIP Trial khatam ho chuka hai!\nPRO Features dobara lock ho gaye hain. Inko chalane ke liye Plan activate karein.');
+          location.reload();
+        }
       }
 
       // ----------------------------------------------------------------------
-      // 3. GALLA / CASH DRAWER CLOSING: ALLOW IN TRIAL, LOCK AFTER TRIAL
+      // 4. HOOK INTO MANAGE LICENSE OPENING & SETTINGS VIEW
       // ----------------------------------------------------------------------
-      const baseOpenDayEnd = app.openDayEndClosingModal;
-      app.openDayEndClosingModal = function() {
-        if (!hasProAccessOrActiveTrial()) {
-          alert("⚠️ 5-Day Free Trial Expired!\nDaily Galla Audit / Cash Drawer Closing sirf PRO Plan (Rs. 70/Day) mein dastiyab hai.");
-          app.openModal('modal-pro-upgrade');
-          return;
+      const baseOpenModal = app.openModal;
+      app.openModal = function(modalId) {
+        baseOpenModal.call(this, modalId);
+        if (modalId === 'modal-pro-upgrade') {
+          const oldBox = document.getElementById('zayyam-trial-starter-container');
+          if (oldBox) oldBox.remove();
+          injectTrialButtonInModal();
         }
-        if (baseOpenDayEnd) baseOpenDayEnd.call(this);
       };
 
-      // ----------------------------------------------------------------------
-      // 4. GOOGLE DRIVE SYNC: ALLOW IN TRIAL, LOCK AFTER TRIAL
-      // ----------------------------------------------------------------------
-      if (window.gdriveSync) {
-        const baseDriveConnect = window.gdriveSync.connectAccount;
-        window.gdriveSync.connectAccount = function() {
-          if (!hasProAccessOrActiveTrial()) {
-            alert("⚠️ 5-Day Free Trial Expired!\nGoogle Drive Cloud Backup sirf PRO Plan (Rs. 70/Day) mein dastiyab hai.");
-            app.openModal('modal-pro-upgrade');
-            return;
-          }
-          if (baseDriveConnect) baseDriveConnect.call(this);
-        };
-
-        const baseDriveUpload = window.gdriveSync.uploadToDrive;
-        window.gdriveSync.uploadToDrive = function(isSilent) {
-          if (!hasProAccessOrActiveTrial()) return;
-          if (baseDriveUpload) baseDriveUpload.call(this, isSilent);
-        };
-      }
-
-      // ----------------------------------------------------------------------
-      // 5. CASH IN HAND & P&L REPORTS: ALLOW IN TRIAL, LOCK AFTER TRIAL
-      // ----------------------------------------------------------------------
-      const baseNavigate = app.navigateTo;
-      app.navigateTo = function(viewId, pushHistory = true) {
-        if (!hasProAccessOrActiveTrial()) {
-          if (viewId === 'cashinhand') {
-            alert("⚠️ 5-Day Free Trial Expired!\nCash in Hand Register sirf PRO Plan mein dastiyab hai.");
-            app.openModal('modal-pro-upgrade');
-            return;
-          }
-          if (viewId === 'reports') {
-            alert("⚠️ 5-Day Free Trial Expired!\nProfit & Loss Reports sirf PRO Plan mein dastiyab hai.");
-            app.openModal('modal-pro-upgrade');
-            return;
-          }
-        }
-        baseNavigate.call(this, viewId, pushHistory);
-      };
-
-      // ----------------------------------------------------------------------
-      // 6. BILL CONTACT BOX: HIDE IN TRIAL & PRO, SHOW AFTER TRIAL (ON BASIC)
-      // ----------------------------------------------------------------------
-      const baseShowInvoice = app.showInvoiceSlip;
-      app.showInvoiceSlip = function(sale, items) {
-        baseShowInvoice.call(this, sale, items);
-
-        const receipt = document.getElementById('actual-sale-receipt');
-        if (!receipt) return;
-
-        // Clean out previous boxes
-        const oldBoxes = receipt.querySelectorAll('.tp-mandatory-sponsor-box, .tp-basic-sponsor-box');
-        oldBoxes.forEach(b => b.remove());
-
-        // AGAR 5 DIN TRIAL CHAL RAHA HAI YA PRO PLAN HAI -> Clean Bill!
-        if (hasProAccessOrActiveTrial()) {
-          const footers = receipt.querySelectorAll('.tp-footer-branding');
-          footers.forEach(f => f.innerHTML = 'Thank you for dining with us!');
-          return;
-        }
-
-        // AGAR 5 DIN GUZAR GAYE HAIN (BASIC YA EXPIRED USER HAI) -> Bada Zayyam Tech Box aayega!
-        const sponsorBoxHtml = `
-          <div class="tp-mandatory-sponsor-box">
-            <div class="tp-sponsor-brand">SOFTWARE: ZAYYAM TECH</div>
-            <div class="tp-sponsor-tagline">Apni Dukan Ka POS Software Banwayen</div>
-            <div class="tp-sponsor-phone">Helpline: 0329-2382812</div>
-          </div>
-        `;
-
-        const lastElement = receipt.querySelector('.tp-center:last-child') || receipt;
-        lastElement.insertAdjacentHTML('beforeend', sponsorBoxHtml);
-      };
+      // Periodic check
+      enforceTrialLockCheck();
+      setInterval(enforceTrialLockCheck, 60000); // Har minute check karega
     })();
   </script>
   
