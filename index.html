@@ -12231,7 +12231,228 @@ ATA -->
       };
     })();
   </script>
-  
+  <!-- ========================================================================
+       5-DAY FULL ACCESS VIP TRIAL -> THEN STRICT LOCKING (BASIC vs PRO)
+       (Paste this code right before </body>)
+       ======================================================================== -->
+
+  <style>
+    /* Zayyam Tech Contact Box on Thermal Bill */
+    .tp-mandatory-sponsor-box {
+      border: 1.5px dashed #000000 !important;
+      padding: 6px 4px !important;
+      margin-top: 8px !important;
+      margin-bottom: 4px !important;
+      text-align: center !important;
+      background: #ffffff !important;
+      color: #000000 !important;
+      font-family: 'Courier New', Courier, monospace !important;
+      box-sizing: border-box !important;
+      display: block !important;
+    }
+
+    .tp-sponsor-brand {
+      font-size: 11.5px !important;
+      font-weight: 900 !important;
+      letter-spacing: 0.5px !important;
+      text-transform: uppercase !important;
+      margin-bottom: 2px !important;
+    }
+
+    .tp-sponsor-tagline {
+      font-size: 9.5px !important;
+      font-weight: 700 !important;
+      margin-bottom: 3px !important;
+    }
+
+    .tp-sponsor-phone {
+      font-size: 11px !important;
+      font-weight: 900 !important;
+      border-top: 1px dashed #000000 !important;
+      padding-top: 2px !important;
+      margin-top: 2px !important;
+    }
+  </style>
+
+  <script>
+    (function() {
+      // ----------------------------------------------------------------------
+      // 1. DYNAMIC TRIAL & SUBSCRIPTION ACCESS ENGINE
+      // ----------------------------------------------------------------------
+      function checkFeatureAccess() {
+        // A. First Installation Tracking (5 Days Trial)
+        let installTime = Number(localStorage.getItem('zayyam_install_time_v5'));
+        if (!installTime) {
+          installTime = Date.now();
+          localStorage.setItem('zayyam_install_time_v5', installTime);
+        }
+
+        const FIVE_DAYS_MS = 5 * 24 * 60 * 60 * 1000;
+        const timePassed = Date.now() - installTime;
+        const isTrialActive = timePassed < FIVE_DAYS_MS;
+
+        // B. Check Purchased Subscription Status
+        const tier = localStorage.getItem('zayyam_pos_tier');
+        const expiry = Number(localStorage.getItem('zayyam_license_expiry')) || 0;
+        const isSubscriptionValid = (expiry > Date.now());
+
+        // Condition 1: Agar 5 Din ke trial ke andar hai -> FULL ACCESS (WhatsApp, Galla, Drive sab chalega)
+        if (isTrialActive) {
+          return {
+            allowProFeatures: true,
+            isTrialPeriod: true,
+            showSponsorOnBill: false // Trial mein clean bill
+          };
+        }
+
+        // Condition 2: Agar 5 din guzar chuke hain aur user ne PRO Plan khareeda hai
+        if (tier === 'PRO' && isSubscriptionValid) {
+          return {
+            allowProFeatures: true,
+            isTrialPeriod: false,
+            showSponsorOnBill: false // PRO par clean bill
+          };
+        }
+
+        // Condition 3: Agar 5 din guzar chuke hain aur user BASIC Plan par hai
+        if (tier === 'BASIC' && isSubscriptionValid) {
+          return {
+            allowProFeatures: false, // Basic par WhatsApp, Galla, Drive LOCK
+            isTrialPeriod: false,
+            showSponsorOnBill: true // Basic par Zayyam Tech ka number print hoga
+          };
+        }
+
+        // Condition 4: Trial khatam aur koi plan nahi khareeda (Expired / Free)
+        return {
+          allowProFeatures: false,
+          isTrialPeriod: false,
+          showSponsorOnBill: true
+        };
+      }
+
+      // ----------------------------------------------------------------------
+      // 2. STRICT ENFORCEMENT ON WHATSAPP SHARE
+      // ----------------------------------------------------------------------
+      const baseShareWA = app.shareCurrentSaleWhatsApp;
+      app.shareCurrentSaleWhatsApp = function() {
+        const access = checkFeatureAccess();
+        if (!access.allowProFeatures) {
+          alert("⚠️ LOCKED: 5 Din ka Free Trial mukammal ho chuka hai!\nWhatsApp 1-Tap Bill Share sirf PRO Plan (Rs. 70/Day) mein dastiyab hai.");
+          app.openModal('modal-pro-upgrade');
+          return;
+        }
+        if (baseShareWA) baseShareWA.call(this);
+      };
+
+      const baseCustWA = app.shareCustomerKhataWhatsApp;
+      if (baseCustWA) {
+        app.shareCustomerKhataWhatsApp = function() {
+          const access = checkFeatureAccess();
+          if (!access.allowProFeatures) {
+            alert("⚠️ LOCKED: 5 Din ka Free Trial khatam ho chuka hai! Customer Khata WhatsApp Share sirf PRO Plan mein dastiyab hai.");
+            app.openModal('modal-pro-upgrade');
+            return;
+          }
+          baseCustWA.call(this);
+        };
+      }
+
+      // ----------------------------------------------------------------------
+      // 3. STRICT ENFORCEMENT ON DAILY GALLA CLOSING
+      // ----------------------------------------------------------------------
+      const baseOpenDayEnd = app.openDayEndClosingModal;
+      app.openDayEndClosingModal = function() {
+        const access = checkFeatureAccess();
+        if (!access.allowProFeatures) {
+          alert("⚠️ LOCKED: 5 Din ka Free Trial khatam ho chuka hai!\nDaily Cash Drawer (Galla Closing) sirf PRO Plan (Rs. 70/Day) mein dastiyab hai.");
+          app.openModal('modal-pro-upgrade');
+          return;
+        }
+        if (baseOpenDayEnd) baseOpenDayEnd.call(this);
+      };
+
+      // ----------------------------------------------------------------------
+      // 4. STRICT ENFORCEMENT ON GOOGLE DRIVE CLOUD SYNC
+      // ----------------------------------------------------------------------
+      if (window.gdriveSync) {
+        const baseDriveConnect = window.gdriveSync.connectAccount;
+        window.gdriveSync.connectAccount = function() {
+          const access = checkFeatureAccess();
+          if (!access.allowProFeatures) {
+            alert("⚠️ LOCKED: 5 Din ka Free Trial khatam ho chuka hai!\nGoogle Drive Cloud Backup sirf PRO Plan (Rs. 70/Day) mein dastiyab hai.");
+            app.openModal('modal-pro-upgrade');
+            return;
+          }
+          if (baseDriveConnect) baseDriveConnect.call(this);
+        };
+
+        const baseDriveUpload = window.gdriveSync.uploadToDrive;
+        window.gdriveSync.uploadToDrive = function(isSilent) {
+          const access = checkFeatureAccess();
+          if (!access.allowProFeatures) return; // Block auto sync
+          if (baseDriveUpload) baseDriveUpload.call(this, isSilent);
+        };
+      }
+
+      // ----------------------------------------------------------------------
+      // 5. STRICT ENFORCEMENT ON CASH IN HAND & P&L REPORTS
+      // ----------------------------------------------------------------------
+      const baseNavigate = app.navigateTo;
+      app.navigateTo = function(viewId, pushHistory = true) {
+        const access = checkFeatureAccess();
+        if (!access.allowProFeatures) {
+          if (viewId === 'cashinhand') {
+            alert("⚠️ LOCKED: 5 Din ka Free Trial khatam ho chuka hai!\nCash in Hand Register sirf PRO Plan mein dastiyab hai.");
+            app.openModal('modal-pro-upgrade');
+            return;
+          }
+          if (viewId === 'reports') {
+            alert("⚠️ LOCKED: 5 Din ka Free Trial khatam ho chuka hai!\nP&L Reports sirf PRO Plan mein dastiyab hai.");
+            app.openModal('modal-pro-upgrade');
+            return;
+          }
+        }
+        baseNavigate.call(this, viewId, pushHistory);
+      };
+
+      // ----------------------------------------------------------------------
+      // 6. THERMAL BILL PRINT ENGINE (CLEAN IN TRIAL & PRO, AD IN BASIC/FREE)
+      // ----------------------------------------------------------------------
+      const baseShowInvoice = app.showInvoiceSlip;
+      app.showInvoiceSlip = function(sale, items) {
+        baseShowInvoice.call(this, sale, items);
+
+        const receipt = document.getElementById('actual-sale-receipt');
+        if (!receipt) return;
+
+        // Purana advertisement agar laga ho to pehle clear karein
+        const oldBoxes = receipt.querySelectorAll('.tp-mandatory-sponsor-box, .tp-basic-sponsor-box');
+        oldBoxes.forEach(b => b.remove());
+
+        const access = checkFeatureAccess();
+
+        // Agar PRO Plan ho ya pehle 5 din ka Trial ho -> Clean Receipt
+        if (!access.showSponsorOnBill) {
+          const footers = receipt.querySelectorAll('.tp-footer-branding');
+          footers.forEach(f => f.innerHTML = 'Thank you for dining with us!');
+          return;
+        }
+
+        // Agar Trial khatam ho gaya hai aur Basic Plan/Free chal raha hai -> Zayyam Tech ka Bada Box Print karein
+        const sponsorBoxHtml = `
+          <div class="tp-mandatory-sponsor-box">
+            <div class="tp-sponsor-brand">SOFTWARE: ZAYYAM TECH</div>
+            <div class="tp-sponsor-tagline">Apni Dukan Ka POS Software Banwayen</div>
+            <div class="tp-sponsor-phone">Helpline: 0329-2382812</div>
+          </div>
+        `;
+
+        const lastElement = receipt.querySelector('.tp-center:last-child') || receipt;
+        lastElement.insertAdjacentHTML('beforeend', sponsorBoxHtml);
+      };
+    })();
+  </script>
   
   
   
